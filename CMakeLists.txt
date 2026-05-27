@@ -52,3 +52,17 @@ add_custom_command(TARGET NeonBulletArena POST_BUILD
         "$<TARGET_FILE:sfml-system>"
         "$<TARGET_FILE_DIR:NeonBulletArena>"
 )
+
+# Copy MinGW runtime DLLs for standalone execution
+get_filename_component(MINGW_BIN_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+add_custom_command(TARGET NeonBulletArena POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${MINGW_BIN_DIR}/libgcc_s_seh-1.dll"
+        "$<TARGET_FILE_DIR:NeonBulletArena>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${MINGW_BIN_DIR}/libstdc++-6.dll"
+        "$<TARGET_FILE_DIR:NeonBulletArena>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${MINGW_BIN_DIR}/libwinpthread-1.dll"
+        "$<TARGET_FILE_DIR:NeonBulletArena>"
+)

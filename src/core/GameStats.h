@@ -36,6 +36,8 @@ struct GameStats {
     float playerFireRateMultiplier = 1.f;
     float playerDamageMultiplier = 1.f;
     bool bulletTimeActive = false;
+    bool bossLaserWarning = false;
+    bool bossLaserActive = false;
     bool bossActive = true;
     bool victory = false;
     bool gameOver = false;

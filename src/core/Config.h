@@ -96,3 +96,31 @@ constexpr float DASH_BATTERY_SPEED_MULT = 1.5f;
 
 // Visual
 constexpr int PARTICLE_POOL_SIZE = 5000;
+
+// UI - Button
+constexpr float BUTTON_WIDTH = 260.f;
+constexpr float BUTTON_HEIGHT = 54.f;
+constexpr float BUTTON_BORDER_THICKNESS = 2.f;
+
+// UI - Menu
+constexpr float MENU_TITLE_SIZE = 48.f;
+constexpr float MENU_BUTTON_SPACING = 20.f;
+constexpr float MENU_OVERLAY_ALPHA = 160.f;
+
+// UI - HUD
+constexpr float HUD_PADDING = 20.f;
+constexpr float HUD_BAR_HEIGHT = 22.f;
+constexpr float HUD_PLAYER_BAR_WIDTH = 280.f;
+constexpr float HUD_BOSS_BAR_WIDTH = 420.f;
+constexpr float HUD_FONT_SIZE_SMALL = 14;
+constexpr float HUD_FONT_SIZE_NORMAL = 18;
+constexpr float HUD_FONT_SIZE_LARGE = 36;
+constexpr float HUD_BAR_LERP_SPEED = 8.f;
+
+// Background
+constexpr int BG_AMBIENT_DOT_COUNT = 35;
+constexpr float BG_GRID_ALPHA = 60.f;
+constexpr float BG_DOT_MIN_RADIUS = 2.5f;
+constexpr float BG_DOT_MAX_RADIUS = 5.f;
+constexpr float BG_DOT_DRIFT_SPEED = 25.f;
+constexpr float BG_DOT_PULSE_SPEED = 1.5f;

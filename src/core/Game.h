@@ -4,6 +4,13 @@
 #include "entities/Player.h"
 #include "entities/Boss.h"
 #include "entities/Item.h"
+#include "systems/BackgroundSystem.h"
+#include "systems/ParticleSystem.h"
+#include "systems/CameraShake.h"
+#include "ui/HUD.h"
+#include "ui/Menu.h"
+
+enum class GameState { MainMenu, Playing, Paused, Victory, GameOver };
 
 class Game {
 public:
@@ -14,9 +21,15 @@ private:
     void processEvents();
     void update(float dt);
     void render();
+    void resetGame();
+    void startGame();
 
     sf::RenderWindow window;
+    sf::Font font;
+
+    GameState state = GameState::MainMenu;
     GameStats gameStats;
+
     Player player;
     Boss boss;
     std::vector<Item> items;
@@ -28,4 +41,15 @@ private:
     sf::Clock clock;
     bool running;
     bool godModeActive = false;
+
+    BackgroundSystem background;
+    ParticleSystem particles;
+    CameraShake cameraShake;
+    HUD hud;
+    Menu menu;
+
+    // Track previous state for effect triggers
+    int prevBossHP = 0;
+    int prevBossPhase = 1;
+    int prevPlayerHP = 0;
 };
