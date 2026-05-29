@@ -603,13 +603,16 @@ void Player::cycleWeapon() {
         WeaponType::Orbital, WeaponType::Cluster, WeaponType::Homing
     };
     constexpr int N = 6;
+    WeaponType prevWeapon = currentWeapon;
     for (int i = 0; i < N; ++i) {
         if (currentWeapon == allWeapons[i]) {
             currentWeapon = allWeapons[(i + 1) % N];
-            return;
+            break;
         }
     }
-    currentWeapon = allWeapons[0];
+    if (prevWeapon == WeaponType::Orbital) {
+        for (auto& bullet : orbitalBullets) bullet.deactivate();
+    }
 }
 
 void Player::cycleWeaponReverse() {
@@ -618,13 +621,16 @@ void Player::cycleWeaponReverse() {
         WeaponType::Orbital, WeaponType::Cluster, WeaponType::Homing
     };
     constexpr int N = 6;
+    WeaponType prevWeapon = currentWeapon;
     for (int i = 0; i < N; ++i) {
         if (currentWeapon == allWeapons[i]) {
             currentWeapon = allWeapons[(i - 1 + N) % N];
-            return;
+            break;
         }
     }
-    currentWeapon = allWeapons[N - 1];
+    if (prevWeapon == WeaponType::Orbital) {
+        for (auto& bullet : orbitalBullets) bullet.deactivate();
+    }
 }
 
 float Player::getShieldTimer() const { return shieldTimer; }
