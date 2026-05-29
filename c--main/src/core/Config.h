@@ -131,9 +131,9 @@ constexpr float PLAYER_PIERCING_SPEED = 1200.f;
 constexpr int PLAYER_PIERCING_DAMAGE = 15;
 constexpr float PLAYER_ORBITAL_SPEED = 180.f;
 constexpr float PLAYER_ORBITAL_RADIUS = 60.f;
-constexpr int ORBITAL_BULLET_DAMAGE = 8;
+constexpr int ORBITAL_BULLET_DAMAGE = 15;
 constexpr float PLAYER_CLUSTER_SPEED = 400.f;
-constexpr int PLAYER_HOMING_DAMAGE = 12;
+constexpr int PLAYER_HOMING_DAMAGE = 18;
 constexpr float HOMING_TURN_RATE = 0.03f;
 
 // === NEW BOSS BULLET PATTERNS ===
@@ -182,7 +182,7 @@ constexpr int MAX_MINIONS = 5;
 
 // === NEW PLAYER FORMS ===
 constexpr float PHASE_SHIFT_DURATION = 1.0f;
-constexpr float PHASE_SHIFT_TRIGGER_CHANCE = 0.2f;
+constexpr float PHASE_SHIFT_TRIGGER_CHANCE = 0.35f;
 constexpr float NOVA_FORM_DURATION = 0.5f;
 constexpr int NOVA_FORM_DAMAGE = 100;
 constexpr float NOVA_FORM_RADIUS = 500.f;
@@ -192,10 +192,24 @@ constexpr float ATTACK_MODULE_DURATION = 10.0f;
 constexpr float ATTACK_MODULE_MULT = 1.3f;
 
 // === PLAYER WEAPON SYSTEM ===
-constexpr float PLAYER_SPREAD_COOLDOWN = 0.25f;
+constexpr float PLAYER_SPREAD_COOLDOWN = 0.3f;
 constexpr float PLAYER_PIERCING_COOLDOWN = 0.5f;
 constexpr float PLAYER_ORBITAL_COOLDOWN = 0.1f;
 constexpr float PLAYER_CLUSTER_COOLDOWN = 0.4f;
 constexpr float PLAYER_HOMING_COOLDOWN = 0.6f;
 constexpr int PLAYER_SPREAD_COUNT = 5;
 constexpr float PLAYER_CLUSTER_BURST_COUNT = 8;
+
+// === WEAPON SPECIAL EFFECTS ===
+constexpr int COMBO_THRESHOLD = 3;
+constexpr float COMBO_DAMAGE_MULT = 1.5f;
+constexpr float COMBO_TIMEOUT = 2.f;
+constexpr float SPREAD_BOUNCE_DAMAGE_MULT = 0.7f;
+constexpr float PIERCE_CHAIN_DAMAGE_RATIO = 0.5f;
+constexpr float PIERCE_CHAIN_RADIUS = 80.f;
+constexpr int ORBITAL_MAX_DAMAGE = 60;
+constexpr int CLUSTER_SPLIT_COUNT = 2;
+constexpr float CLUSTER_SPLIT_DAMAGE_RATIO = 0.3f;
+constexpr float HOMING_SLOW_STACK = 0.1f;
+constexpr float HOMING_SLOW_DURATION = 2.f;
+constexpr int HOMING_SLOW_MAX_STACKS = 3;

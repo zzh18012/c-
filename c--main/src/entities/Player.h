@@ -47,6 +47,11 @@ public:
     bool isPhaseShifting() const;
     bool isNovaFormActive() const;
     float getPhaseShiftTimer() const;
+    int getComboCount() const;
+    int getSlowStacks() const;
+    float getComboDamageMultiplier() const;
+    float getSlowMultiplier() const;
+    void registerHit(int targetId);
 
     std::vector<PlayerBullet>& getBullets();
     std::vector<PlayerBulletSpread>& getSpreadBullets();
@@ -103,4 +108,23 @@ private:
 
     float mechRotationAngle;
     float weaponRecoilTimer;
+
+    // Normal weapon combo system
+    int comboCount;
+    float comboTimer;
+    int lastHitTargetId;
+
+    // Spread bounce tracking (bullet index -> bounced bool)
+    std::vector<bool> spreadBounced;
+
+    // Piercing chain tracking
+    int lastPiercingTargetId;
+
+    // Orbital accumulated damage & hit flags
+    int orbitalAccumulatedDamage[4];
+    bool orbitalHitThisOrbit[4];
+
+    // Homing slow debuff
+    int slowStacks;
+    float slowTimer;
 };

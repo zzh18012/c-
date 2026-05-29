@@ -32,11 +32,22 @@ Player::Player()
     , dashTimer(0.f)
     , mechRotationAngle(0.f)
     , weaponRecoilTimer(0.f)
+    , comboCount(0)
+    , comboTimer(0.f)
+    , lastHitTargetId(-1)
+    , lastPiercingTargetId(-1)
+    , slowStacks(0)
+    , slowTimer(0.f)
 {
     bullets.resize(MAX_PLAYER_BULLETS);
     spreadBullets.resize(50);
+    spreadBounced.resize(50, false);
     piercingBullets.resize(20);
     orbitalBullets.resize(4);
+    for (int i = 0; i < 4; ++i) {
+        orbitalAccumulatedDamage[i] = 0;
+        orbitalHitThisOrbit[i] = false;
+    }
     clusterBullets.resize(20);
     homingBullets.resize(15);
 }
@@ -217,6 +228,21 @@ void Player::update(float dt) {
     if (dashCooldown > 0.f) dashCooldown -= dt;
 
     if (weaponRecoilTimer > 0.f) weaponRecoilTimer -= dt;
+
+    if (comboTimer > 0.f) {
+        comboTimer -= dt;
+        if (comboTimer <= 0.f) {
+            comboCount = 0;
+            lastHitTargetId = -1;
+        }
+    }
+
+    if (slowTimer > 0.f) {
+        slowTimer -= dt;
+        if (slowTimer <= 0.f) {
+            slowStacks = 0;
+        }
+    }
 
     if (dashing) {
         dashTimer -= dt;
@@ -653,3 +679,25 @@ bool Player::isDashing() const { return dashing; }
 bool Player::isPhaseShifting() const { return phaseShiftTimer > 0.f; }
 bool Player::isNovaFormActive() const { return novaFormTimer > 0.f; }
 float Player::getPhaseShiftTimer() const { return phaseShiftTimer; }
+
+int Player::getComboCount() const { return comboCount; }
+int Player::getSlowStacks() const { return slowStacks; }
+
+float Player::getComboDamageMultiplier() const {
+    return (comboCount >= 3) ? 1.5f : 1.f;
+}
+
+float Player::getSlowMultiplier() const {
+    return 1.f - slowStacks * 0.1f;
+}
+
+void Player::registerHit(int targetId) {
+    if (targetId == lastHitTargetId) {
+        comboCount++;
+        comboTimer = 2.f;
+    } else {
+        comboCount = 1;
+        lastHitTargetId = targetId;
+        comboTimer = 2.f;
+    }
+}

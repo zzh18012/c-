@@ -12,6 +12,10 @@ public:
     sf::Vector2f getPosition() const;
     float getRadius() const;
     int getDamage() const;
+    bool hasChained() const;
+    void triggerChain();
+    sf::Vector2f getChainTarget() const;
+    float getChainTimer() const;
 
 private:
     sf::Vector2f position;
@@ -20,4 +24,8 @@ private:
     bool active;
     int damage;
     float angle;
+    bool chained;
+    sf::Vector2f chainStartPos;
+    sf::Vector2f chainDir;
+    float chainTimer;
 };

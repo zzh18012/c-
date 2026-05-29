@@ -26,6 +26,8 @@ public:
     void clearAllBullets();
     void setBulletSpeedMultiplier(float mult);
     float getBulletSpeedMultiplier() const;
+    void applySlow(int stacks);
+    float getSlowMultiplier() const;
 
     bool isLaserWarning() const;
     bool isLaserActive() const;
@@ -114,6 +116,8 @@ private:
     sf::Vector2f chargeBeamTarget;
     float tentacleSweepY;
     float screenLockProgress;
+    int slowStacks;
+    float slowTimer;
 
     // Animation state
     float pulseTimer;

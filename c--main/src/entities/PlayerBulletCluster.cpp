@@ -10,10 +10,10 @@ PlayerBulletCluster::PlayerBulletCluster()
     , exploded(false)
     , damage(PLAYER_BULLET_DAMAGE)
     , lifetime(0.f)
-    , subBulletCount(0)
+    , splitSpawned(false)
+    , splitCount(0)
 {
     shape.setFillColor(sf::Color(255, 150, 50));
-    subBulletOffsets.reserve(8);
 }
 
 void PlayerBulletCluster::spawn(sf::Vector2f pos, sf::Vector2f dir) {
@@ -23,8 +23,8 @@ void PlayerBulletCluster::spawn(sf::Vector2f pos, sf::Vector2f dir) {
     exploded = false;
     damage = PLAYER_BULLET_DAMAGE;
     lifetime = 0.f;
-    subBulletOffsets.clear();
-    subBulletCount = 0;
+    splitSpawned = false;
+    splitCount = 0;
 }
 
 void PlayerBulletCluster::update(float dt) {
@@ -46,13 +46,7 @@ void PlayerBulletCluster::update(float dt) {
 
 void PlayerBulletCluster::triggerExplosion() {
     exploded = true;
-    subBulletCount = 8;
-    subBulletOffsets.reserve(subBulletCount);
-    for (int i = 0; i < subBulletCount; ++i) {
-        float angle = 3.14159f * 2.f * i / subBulletCount;
-        float dist = PLAYER_BULLET_RADIUS * 3.f;
-        subBulletOffsets.push_back(sf::Vector2f(std::cos(angle) * dist, std::sin(angle) * dist));
-    }
+    splitCount = CLUSTER_SPLIT_COUNT;
 }
 
 void PlayerBulletCluster::render(sf::RenderWindow& window) const {
@@ -72,13 +66,15 @@ void PlayerBulletCluster::render(sf::RenderWindow& window) const {
     inner.setFillColor(sf::Color(255, 220, 150));
     window.draw(inner);
 
-    if (exploded) {
-        for (const auto& offset : subBulletOffsets) {
-            sf::CircleShape sub(PLAYER_BULLET_RADIUS * 0.6f);
-            sub.setOrigin(sf::Vector2f(PLAYER_BULLET_RADIUS * 0.6f, PLAYER_BULLET_RADIUS * 0.6f));
-            sub.setPosition(position + offset);
-            sub.setFillColor(sf::Color(255, 200, 80, 220));
-            window.draw(sub);
+    if (exploded && !splitSpawned) {
+        for (int i = 0; i < splitCount; ++i) {
+            float angle = 3.14159f * 2.f * i / splitCount + 0.3f;
+            sf::Vector2f offset(std::cos(angle) * PLAYER_BULLET_RADIUS * 2.f, std::sin(angle) * PLAYER_BULLET_RADIUS * 2.f);
+            sf::CircleShape splitBullet(PLAYER_BULLET_RADIUS * 0.6f);
+            splitBullet.setOrigin(sf::Vector2f(PLAYER_BULLET_RADIUS * 0.6f, PLAYER_BULLET_RADIUS * 0.6f));
+            splitBullet.setPosition(position + offset);
+            splitBullet.setFillColor(sf::Color(255, 200, 80, 220));
+            window.draw(splitBullet);
         }
     }
 }
@@ -90,3 +86,9 @@ bool PlayerBulletCluster::hasExploded() const { return exploded; }
 sf::Vector2f PlayerBulletCluster::getPosition() const { return position; }
 float PlayerBulletCluster::getRadius() const { return shape.getRadius(); }
 int PlayerBulletCluster::getDamage() const { return damage; }
+bool PlayerBulletCluster::hasSpawnedSplit() const { return splitSpawned; }
+void PlayerBulletCluster::setSplitSpawned() { splitSpawned = true; }
+sf::Vector2f PlayerBulletCluster::getSplitDirection(int index) const {
+    float angle = 3.14159f * 2.f * index / splitCount + 0.3f;
+    return sf::Vector2f(std::cos(angle), std::sin(angle));
+}

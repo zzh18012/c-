@@ -12,6 +12,8 @@ public:
     sf::Vector2f getPosition() const;
     float getRadius() const;
     int getDamage() const;
+    bool hasBounced() const;
+    void triggerBounce();
 
 private:
     sf::Vector2f position;
@@ -19,4 +21,5 @@ private:
     sf::CircleShape shape;
     bool active;
     int damage;
+    bool bounced;
 };

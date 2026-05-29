@@ -15,6 +15,11 @@ add_executable(NeonBulletArena
     src/entities/Player.cpp
     src/entities/Boss.cpp
     src/entities/PlayerBullet.cpp
+    src/entities/PlayerBulletSpread.cpp
+    src/entities/PlayerBulletPiercing.cpp
+    src/entities/PlayerBulletOrbital.cpp
+    src/entities/PlayerBulletCluster.cpp
+    src/entities/PlayerBulletHoming.cpp
     src/entities/BossBullet.cpp
     src/entities/Item.cpp
     src/systems/CollisionSystem.cpp

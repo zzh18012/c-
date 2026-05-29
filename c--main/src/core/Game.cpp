@@ -383,7 +383,9 @@ void Game::update(float dt) {
         if (CollisionSystem::checkCircleCollision(
                 bullet.getPosition(), bullet.getRadius(),
                 boss.getPosition(), boss.getRadius())) {
-            boss.takeDamage(bullet.getDamage());
+            player.registerHit(0);
+            int dmg = static_cast<int>(bullet.getDamage() * player.getComboDamageMultiplier());
+            boss.takeDamage(dmg);
             audio.playHit();
             particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 255, 100));
             bullet.deactivate();
@@ -415,15 +417,23 @@ void Game::update(float dt) {
         }
     }
 
-    // Player orbital bullets vs Boss collision
-    for (auto& bullet : player.getOrbitalBullets()) {
-        if (!bullet.isActive()) continue;
-        if (CollisionSystem::checkCircleCollision(
-                bullet.getPosition(), bullet.getRadius(),
-                boss.getPosition(), boss.getRadius())) {
-            boss.takeDamage(bullet.getDamage());
+    // Player orbital bullets vs Boss collision (accumulated burst damage)
+    {
+        int totalOrbitalDamage = 0;
+        for (auto& bullet : player.getOrbitalBullets()) {
+            if (!bullet.isActive()) continue;
+            if (CollisionSystem::checkCircleCollision(
+                    bullet.getPosition(), bullet.getRadius(),
+                    boss.getPosition(), boss.getRadius())) {
+                totalOrbitalDamage += bullet.getDamage();
+                totalOrbitalDamage += bullet.getOrbitCount() * 5;
+                bullet.resetOrbitCount();
+                bullet.deactivate();
+            }
+        }
+        if (totalOrbitalDamage > 0) {
+            boss.takeDamage(totalOrbitalDamage);
             audio.playHit();
-            particles.spawnHitSpark(bullet.getPosition(), sf::Color(0, 255, 180));
         }
     }
 
@@ -447,6 +457,7 @@ void Game::update(float dt) {
                 bullet.getPosition(), bullet.getRadius(),
                 boss.getPosition(), boss.getRadius())) {
             boss.takeDamage(bullet.getDamage());
+            boss.applySlow(1);
             audio.playHit();
             particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 100, 200));
             bullet.deactivate();

@@ -4,7 +4,7 @@
 class PlayerBulletOrbital {
 public:
     PlayerBulletOrbital();
-    void spawn(sf::Vector2f center, float angleOffset, float radius);
+    void spawn(sf::Vector2f center, float angleOff, float radius);
     void update(float dt, const sf::Vector2f& playerPos);
     void render(sf::RenderWindow& window) const;
     bool isActive() const;
@@ -12,6 +12,8 @@ public:
     sf::Vector2f getPosition() const;
     float getRadius() const;
     int getDamage() const;
+    int getOrbitCount() const;
+    void resetOrbitCount();
 
 private:
     sf::Vector2f position;
@@ -21,4 +23,6 @@ private:
     sf::CircleShape shape;
     bool active;
     int damage;
+    int orbitCount;
+    int lastQuadrant;
 };

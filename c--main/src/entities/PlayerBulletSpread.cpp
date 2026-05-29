@@ -8,6 +8,7 @@ PlayerBulletSpread::PlayerBulletSpread()
     , shape(PLAYER_BULLET_RADIUS)
     , active(false)
     , damage(PLAYER_BULLET_DAMAGE)
+    , bounced(false)
 {
     shape.setFillColor(sf::Color(0, 200, 255));
 }
@@ -19,12 +20,29 @@ void PlayerBulletSpread::spawn(sf::Vector2f pos, sf::Vector2f dir, float angleOf
     velocity = sf::Vector2f(std::cos(angle) * speed, std::sin(angle) * speed);
     active = true;
     damage = PLAYER_BULLET_DAMAGE;
+    bounced = false;
 }
 
 void PlayerBulletSpread::update(float dt) {
     if (!active) return;
     position += velocity * dt;
     shape.setPosition(position);
+
+    if (!bounced) {
+        if (position.x <= PLAYER_BULLET_RADIUS || position.x >= WINDOW_WIDTH - PLAYER_BULLET_RADIUS) {
+            velocity.x = -velocity.x;
+            bounced = true;
+            damage = static_cast<int>(damage * SPREAD_BOUNCE_DAMAGE_MULT);
+            position.x = std::max(PLAYER_BULLET_RADIUS, std::min(position.x, WINDOW_WIDTH - PLAYER_BULLET_RADIUS));
+        }
+        if (position.y <= PLAYER_BULLET_RADIUS || position.y >= WINDOW_HEIGHT - PLAYER_BULLET_RADIUS) {
+            velocity.y = -velocity.y;
+            bounced = true;
+            damage = static_cast<int>(damage * SPREAD_BOUNCE_DAMAGE_MULT);
+            position.y = std::max(PLAYER_BULLET_RADIUS, std::min(position.y, WINDOW_HEIGHT - PLAYER_BULLET_RADIUS));
+        }
+    }
+
     if (position.x < -50 || position.x > WINDOW_WIDTH + 50 ||
         position.y < -50 || position.y > WINDOW_HEIGHT + 50) {
         active = false;
@@ -53,3 +71,5 @@ void PlayerBulletSpread::deactivate() { active = false; }
 sf::Vector2f PlayerBulletSpread::getPosition() const { return position; }
 float PlayerBulletSpread::getRadius() const { return shape.getRadius(); }
 int PlayerBulletSpread::getDamage() const { return damage; }
+bool PlayerBulletSpread::hasBounced() const { return bounced; }
+void PlayerBulletSpread::triggerBounce() { bounced = true; }

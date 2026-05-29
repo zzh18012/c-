@@ -20,6 +20,9 @@ public:
     float getRadius() const;
     int getDamage() const;
     bool hasExploded() const;
+    bool hasSpawnedSplit() const;
+    void setSplitSpawned();
+    sf::Vector2f getSplitDirection(int index) const;
 
 private:
     sf::Vector2f position;
@@ -30,6 +33,6 @@ private:
     int damage;
     float lifetime;
 
-    std::vector<sf::Vector2f> subBulletOffsets;
-    int subBulletCount;
+    bool splitSpawned;
+    int splitCount;
 };
