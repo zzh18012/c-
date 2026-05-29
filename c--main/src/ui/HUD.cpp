@@ -171,6 +171,8 @@ void HUD::update(const GameStats& stats) {
     bossPhaseText->setString(phaseStr.str());
 
     // Phase markers highlight when active phase is near
+    phaseMarker70.setFillColor(sf::Color(255, 180, 40, 150));
+    phaseMarker35.setFillColor(sf::Color(255, 80, 40, 150));
     if (stats.bossPhase == 2) {
         phaseMarker70.setFillColor(sf::Color(255, 200, 50, 220));
     }
