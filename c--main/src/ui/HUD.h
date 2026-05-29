@@ -41,6 +41,7 @@ private:
     // End message
     float endMessageAlpha = 0.f;
     float attackFlashTimer = 0.f;
+    std::string lastAttackName;
 
     // Smooth HP values
     float displayedPlayerHP = 100.f;

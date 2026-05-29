@@ -181,17 +181,23 @@ void HUD::update(const GameStats& stats) {
     }
 
     // Attack name
-    attackNameText->setString(stats.currentAttackName);
-    attackFlashTimer += 0.016f;
-    if (stats.bossLaserWarning) {
-        float flash = (sinf(attackFlashTimer * 8.f) + 1.f) * 0.5f;
-        attackNameText->setFillColor(sf::Color(255, static_cast<std::uint8_t>(60 + flash * 195), static_cast<std::uint8_t>(60 + flash * 195)));
-    } else {
-        attackNameText->setFillColor(sf::Color(255, 220, 100));
+    if (attackNameText) {
+        std::string newName = stats.currentAttackName;
+        if (newName != lastAttackName) {
+            lastAttackName = newName;
+            attackNameText->setString(newName);
+            sf::FloatRect ab = attackNameText->getLocalBounds();
+            attackNameText->setOrigin(sf::Vector2f(ab.position.x + ab.size.x / 2.f, ab.position.y));
+            attackFlashTimer = 0.f;
+        }
+        attackFlashTimer += 0.016f;
+        if (stats.bossLaserWarning) {
+            float flash = (sinf(attackFlashTimer * 8.f) + 1.f) * 0.5f;
+            attackNameText->setFillColor(sf::Color(255, static_cast<std::uint8_t>(60 + flash * 195), static_cast<std::uint8_t>(60 + flash * 195)));
+        } else {
+            attackNameText->setFillColor(sf::Color(255, 220, 100));
+        }
     }
-    // Center the attack name text
-    sf::FloatRect ab = attackNameText->getLocalBounds();
-    attackNameText->setOrigin(sf::Vector2f(ab.position.x + ab.size.x / 2.f, ab.position.y));
 
     // Buff timers
     shieldText->setString(stats.playerShieldTimer > 0.f ? fmtTime(stats.playerShieldTimer) : "");
