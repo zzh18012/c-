@@ -83,6 +83,11 @@ void Boss::update(float dt, const sf::Vector2f& playerPosition) {
     sf::Vector2f toPlayer = playerPosition - position;
     eyeTrackAngle = std::atan2(toPlayer.y, toPlayer.x);
 
+    if (slowTimer > 0.f) {
+        slowTimer -= dt;
+        if (slowTimer <= 0.f) slowStacks = 0;
+    }
+
     updateAttackPattern(dt, playerPosition);
 
     for (auto& bullet : bullets) {
@@ -107,6 +112,8 @@ void Boss::resetNewAttackTimers() {
     screenLockTimer = 0.f;
     bulletRainFullTimer = 0.f;
     phaseTransitionTimer = 0.f;
+    slowStacks = 0;
+    slowTimer = 0.f;
 }
 
 void Boss::updateAttackPattern(float dt, const sf::Vector2f& playerPos) {
@@ -669,7 +676,7 @@ void Boss::executeTentacleSweep(float dt, const sf::Vector2f& playerPos) {
     if (fireTimer >= 0.1f) {
         fireTimer -= 0.1f;
 
-        float tipX = position.x + 200.f;
+        float tipX = position.x + 400.f;
         sf::Vector2f tipPos(tipX, tentacleSweepY);
         sf::Vector2f dir(-1.f, 0.f);
         spawnBullet(tipPos, dir, BOSS_BULLET_SPEED_FAST, BOSS_BULLET_DAMAGE * 2);
@@ -1072,7 +1079,8 @@ void Boss::takeDamage(int damage) {
 void Boss::spawnBullet(sf::Vector2f pos, sf::Vector2f dir, float speed, int dmg) {
     for (auto& bullet : bullets) {
         if (!bullet.isActive()) {
-            bullet.spawn(pos, dir, speed * bulletSpeedMultiplier, dmg);
+            float slowMult = getSlowMultiplier();
+            bullet.spawn(pos, dir, speed * bulletSpeedMultiplier * slowMult, dmg);
             return;
         }
     }
@@ -1080,6 +1088,15 @@ void Boss::spawnBullet(sf::Vector2f pos, sf::Vector2f dir, float speed, int dmg)
 
 void Boss::setBulletSpeedMultiplier(float mult) { bulletSpeedMultiplier = mult; }
 float Boss::getBulletSpeedMultiplier() const { return bulletSpeedMultiplier; }
+
+void Boss::applySlow(int stacks) {
+    slowStacks = std::min(slowStacks + stacks, HOMING_SLOW_MAX_STACKS);
+    slowTimer = HOMING_SLOW_DURATION;
+}
+
+float Boss::getSlowMultiplier() const {
+    return 1.f - slowStacks * HOMING_SLOW_STACK;
+}
 
 void Boss::clearAllBullets() {
     for (auto& bullet : bullets) {
