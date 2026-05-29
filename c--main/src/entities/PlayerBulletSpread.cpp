@@ -34,7 +34,7 @@ void PlayerBulletSpread::update(float dt) {
 void PlayerBulletSpread::render(sf::RenderWindow& window) const {
     if (!active) return;
     sf::CircleShape outer(shape.getRadius() * 2.f);
-    outer.setOrigin(sf::Vector2f(shape.getRadius() * 2.f, shape.getRadius()) * 2.f);
+    outer.setOrigin(sf::Vector2f(shape.getRadius() * 2.f, shape.getRadius() * 2.f));
     outer.setPosition(position);
     outer.setFillColor(sf::Color(0, 150, 200, 80));
     window.draw(outer);
@@ -42,7 +42,7 @@ void PlayerBulletSpread::render(sf::RenderWindow& window) const {
     window.draw(shape);
 
     sf::CircleShape inner(shape.getRadius() * 0.5f);
-    inner.setOrigin(sf::Vector2f(shape.getRadius() * 0.5f, shape.getRadius()) * 0.5f);
+    inner.setOrigin(sf::Vector2f(shape.getRadius() * 0.5f, shape.getRadius() * 0.5f));
     inner.setPosition(position);
     inner.setFillColor(sf::Color(200, 255, 255, 255));
     window.draw(inner);

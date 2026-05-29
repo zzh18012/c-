@@ -36,13 +36,13 @@ void PlayerBulletOrbital::render(sf::RenderWindow& window) const {
     if (!active) return;
 
     sf::CircleShape outer(shape.getRadius() * 2.f);
-    outer.setOrigin(sf::Vector2f(shape.getRadius() * 2.f, shape.getRadius()) * 2.f);
+    outer.setOrigin(sf::Vector2f(shape.getRadius() * 2.f, shape.getRadius() * 2.f));
     outer.setPosition(position);
     outer.setFillColor(sf::Color(0, 200, 150, 80));
     window.draw(outer);
 
     sf::CircleShape mid(shape.getRadius() * 1.3f);
-    mid.setOrigin(sf::Vector2f(shape.getRadius() * 1.3f, shape.getRadius()) * 1.3f);
+    mid.setOrigin(sf::Vector2f(shape.getRadius() * 1.3f, shape.getRadius() * 1.3f));
     mid.setPosition(position);
     mid.setFillColor(sf::Color(0, 255, 180, 150));
     window.draw(mid);
@@ -50,7 +50,7 @@ void PlayerBulletOrbital::render(sf::RenderWindow& window) const {
     window.draw(shape);
 
     sf::CircleShape inner(shape.getRadius() * 0.4f);
-    inner.setOrigin(sf::Vector2f(shape.getRadius() * 0.4f, shape.getRadius()) * 0.4f);
+    inner.setOrigin(sf::Vector2f(shape.getRadius() * 0.4f, shape.getRadius() * 0.4f));
     inner.setPosition(position);
     inner.setFillColor(sf::Color(200, 255, 240));
     window.draw(inner);
