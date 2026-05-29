@@ -1,5 +1,9 @@
 # Build output
 build/
+build-*/
+
+# Intermediate build artifacts
+objs/
 
 # IDE
 .vscode/
