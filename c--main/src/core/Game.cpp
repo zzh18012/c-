@@ -176,7 +176,6 @@ void Game::update(float dt) {
     boss.update(dt, player.getPosition());
 
     // Track previous state for effect triggers
-    int bossHPBefore = boss.getHP();
     int bossPhaseBefore = boss.getPhase();
     int playerHPBefore = player.getHP();
 
