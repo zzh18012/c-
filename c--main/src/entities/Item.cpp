@@ -58,10 +58,13 @@ void Item::render(sf::RenderWindow& window) const {
         case ItemType::BulletTime:  drawBulletTime(window, position, angle, glow); break;
         case ItemType::NovaBomb:    drawNovaBomb(window, position, angle, glow); break;
         case ItemType::DashBattery: drawDashBattery(window, position, angle, glow); break;
+        case ItemType::WeaponEssence: drawWeaponEssence(window, position, angle, glow); break;
+        case ItemType::PhaseCrystal: drawPhaseCrystal(window, position, angle, glow); break;
+        case ItemType::SpeedCoil:   drawSpeedCoil(window, position, angle, glow); break;
+        case ItemType::AttackModule: drawAttackModule(window, position, angle, glow); break;
+        case ItemType::NovaCore:    drawNovaCore(window, position, angle, glow); break;
     }
 }
-
-uint8_t alpha(float v) { return static_cast<uint8_t>(v); }
 
 void Item::drawHealCore(sf::RenderWindow& window, sf::Vector2f pos, float angle, float glow) const {
     // Outer glow ring
