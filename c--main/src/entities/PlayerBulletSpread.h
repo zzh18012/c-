@@ -12,6 +12,7 @@ public:
     sf::Vector2f getPosition() const;
     float getRadius() const;
     int getDamage() const;
+    void setDamage(int dmg);
     bool hasBounced() const;
     void triggerBounce();
 

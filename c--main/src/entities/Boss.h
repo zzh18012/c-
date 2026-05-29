@@ -76,8 +76,6 @@ private:
 
     sf::Vector2f position;
     sf::Vector2f originalPosition;
-    std::vector<sf::CircleShape> tentacleShapes;
-    std::vector<sf::CircleShape> orbShapes;
 
     std::vector<BossBullet> bullets;
 
@@ -123,6 +121,4 @@ private:
     float pulseTimer;
     float deformTimer;
     float eyeTrackAngle;
-    mutable float tentaclePhases[6];
-    mutable float orbPhases[4];
 };

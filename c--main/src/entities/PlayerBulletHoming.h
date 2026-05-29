@@ -9,6 +9,7 @@ public:
     void render(sf::RenderWindow& window) const;
     bool isActive() const;
     void deactivate();
+    void setDamage(int dmg);
     sf::Vector2f getPosition() const;
     float getRadius() const;
     int getDamage() const;

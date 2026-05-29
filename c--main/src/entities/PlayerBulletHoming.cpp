@@ -76,6 +76,7 @@ void PlayerBulletHoming::render(sf::RenderWindow& window) const {
 
 bool PlayerBulletHoming::isActive() const { return active; }
 void PlayerBulletHoming::deactivate() { active = false; }
+void PlayerBulletHoming::setDamage(int dmg) { damage = dmg; }
 sf::Vector2f PlayerBulletHoming::getPosition() const { return position; }
 float PlayerBulletHoming::getRadius() const { return shape.getRadius(); }
 int PlayerBulletHoming::getDamage() const { return damage; }

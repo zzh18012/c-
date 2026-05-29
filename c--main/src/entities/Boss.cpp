@@ -46,13 +46,6 @@ Boss::Boss()
 {
     bullets.resize(MAX_BOSS_BULLETS);
 
-    for (int i = 0; i < 6; i++) {
-        tentaclePhases[i] = static_cast<float>(rand()) / RAND_MAX * PI * 2.f;
-    }
-    for (int i = 0; i < 4; i++) {
-        orbPhases[i] = static_cast<float>(rand()) / RAND_MAX * PI * 2.f;
-    }
-
     switchToNextAttack();
 }
 
@@ -676,7 +669,7 @@ void Boss::executeTentacleSweep(float dt, const sf::Vector2f& playerPos) {
     if (fireTimer >= 0.1f) {
         fireTimer -= 0.1f;
 
-        float tipX = position.x + 400.f;
+        float tipX = position.x + BOSS_RADIUS * 0.8f;
         sf::Vector2f tipPos(tipX, tentacleSweepY);
         sf::Vector2f dir(-1.f, 0.f);
         spawnBullet(tipPos, dir, BOSS_BULLET_SPEED_FAST, BOSS_BULLET_DAMAGE * 2);

@@ -365,11 +365,9 @@ void AudioSystem::playShoot() {
 
 void AudioSystem::playHit() {
     ensureSoundsInitialized();
-    fprintf(stderr, "HIT: buffer samples=%u\n", static_cast<unsigned>(hitBuffer.getSampleCount()));
     sf::Sound sound(hitBuffer);
     sound.setVolume(100.f);
     sound.play();
-    fprintf(stderr, "HIT: sound status=%d\n", sound.getStatus());
 }
 
 void AudioSystem::playPickup() {

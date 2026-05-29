@@ -398,7 +398,7 @@ void Game::update(float dt) {
         if (CollisionSystem::checkCircleCollision(
                 bullet.getPosition(), bullet.getRadius(),
                 boss.getPosition(), boss.getRadius())) {
-            boss.takeDamage(bullet.getDamage());
+            boss.takeDamage(bullet.getDamage() * player.getComboDamageMultiplier());
             audio.playHit();
             particles.spawnHitSpark(bullet.getPosition(), sf::Color(0, 200, 255));
             bullet.deactivate();

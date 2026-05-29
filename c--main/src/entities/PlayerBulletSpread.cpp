@@ -72,4 +72,5 @@ sf::Vector2f PlayerBulletSpread::getPosition() const { return position; }
 float PlayerBulletSpread::getRadius() const { return shape.getRadius(); }
 int PlayerBulletSpread::getDamage() const { return damage; }
 bool PlayerBulletSpread::hasBounced() const { return bounced; }
+void PlayerBulletSpread::setDamage(int dmg) { damage = dmg; }
 void PlayerBulletSpread::triggerBounce() { bounced = true; }

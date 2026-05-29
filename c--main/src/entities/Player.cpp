@@ -15,7 +15,6 @@ Player::Player()
     , clusterCooldown(0.f)
     , homingCooldown(0.f)
     , currentWeapon(WeaponType::Normal)
-    , secondaryWeapon(WeaponType::Spread)
     , hp(PLAYER_MAX_HP)
     , maxHP(PLAYER_MAX_HP)
     , invincibleTimer(0.f)
@@ -30,24 +29,17 @@ Player::Player()
     , dashCooldown(0.f)
     , dashing(false)
     , dashTimer(0.f)
-    , mechRotationAngle(0.f)
     , weaponRecoilTimer(0.f)
     , comboCount(0)
     , comboTimer(0.f)
     , lastHitTargetId(-1)
-    , lastPiercingTargetId(-1)
     , slowStacks(0)
     , slowTimer(0.f)
 {
     bullets.resize(MAX_PLAYER_BULLETS);
     spreadBullets.resize(50);
-    spreadBounced.resize(50, false);
     piercingBullets.resize(20);
     orbitalBullets.resize(4);
-    for (int i = 0; i < 4; ++i) {
-        orbitalAccumulatedDamage[i] = 0;
-        orbitalHitThisOrbit[i] = false;
-    }
     clusterBullets.resize(20);
     homingBullets.resize(15);
 }
@@ -123,8 +115,9 @@ void Player::handleInput(float dt, const sf::RenderWindow& window) {
 
 void Player::shoot() {
     float rateMult = (overdriveTimer > 0.f) ? OVERDRIVE_FIRE_RATE_MULT : 1.f;
-    float dmgMult = (attackModuleTimer > 0.f) ? ATTACK_MODULE_MULT : 1.f;
+    float dmgMult = 1.f;
     if (overdriveTimer > 0.f) dmgMult = OVERDRIVE_DAMAGE_MULT;
+    if (attackModuleTimer > 0.f) dmgMult = std::max(dmgMult, ATTACK_MODULE_MULT);
 
     switch (currentWeapon) {
         case WeaponType::Normal:
@@ -155,6 +148,7 @@ void Player::shoot() {
                             float angle = startAngle + step * i;
                             sf::Vector2f dir(std::cos(angle), std::sin(angle));
                             bullet.spawn(position, dir, 0.f);
+                            bullet.setDamage(static_cast<int>(PLAYER_BULLET_DAMAGE * dmgMult));
                             if (AudioSystem::getInstance()) AudioSystem::getInstance()->playShoot();
                             break;
                         }
@@ -190,6 +184,7 @@ void Player::shoot() {
             for (auto& bullet : clusterBullets) {
                 if (!bullet.isActive()) {
                     bullet.spawn(position, aimDir);
+                    bullet.setDamage(static_cast<int>(PLAYER_BULLET_DAMAGE * dmgMult));
                     if (AudioSystem::getInstance()) AudioSystem::getInstance()->playShoot();
                     break;
                 }
@@ -202,6 +197,7 @@ void Player::shoot() {
             for (auto& bullet : homingBullets) {
                 if (!bullet.isActive()) {
                     bullet.spawn(position, aimDir);
+                    bullet.setDamage(static_cast<int>(PLAYER_HOMING_DAMAGE * dmgMult));
                     if (AudioSystem::getInstance()) AudioSystem::getInstance()->playShoot();
                     break;
                 }
@@ -694,10 +690,10 @@ float Player::getSlowMultiplier() const {
 void Player::registerHit(int targetId) {
     if (targetId == lastHitTargetId) {
         comboCount++;
-        comboTimer = 2.f;
+        comboTimer = COMBO_TIMEOUT;
     } else {
         comboCount = 1;
         lastHitTargetId = targetId;
-        comboTimer = 2.f;
+        comboTimer = COMBO_TIMEOUT;
     }
 }

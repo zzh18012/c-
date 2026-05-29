@@ -22,6 +22,7 @@ public:
     bool hasExploded() const;
     bool hasSpawnedSplit() const;
     void setSplitSpawned();
+    void setDamage(int dmg);
     sf::Vector2f getSplitDirection(int index) const;
 
 private:

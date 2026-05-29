@@ -206,9 +206,7 @@ void ParticleSystem::update(float dt) {
 }
 
 void ParticleSystem::render(sf::RenderWindow& window) {
-    // Use VertexArray for efficient batch rendering
     sf::VertexArray va(sf::PrimitiveType::Triangles);
-    std::vector<sf::VertexArray> batches;
 
     for (const auto& p : particles) {
         if (!p.active) continue;

@@ -88,6 +88,7 @@ float PlayerBulletCluster::getRadius() const { return shape.getRadius(); }
 int PlayerBulletCluster::getDamage() const { return damage; }
 bool PlayerBulletCluster::hasSpawnedSplit() const { return splitSpawned; }
 void PlayerBulletCluster::setSplitSpawned() { splitSpawned = true; }
+void PlayerBulletCluster::setDamage(int dmg) { damage = dmg; }
 sf::Vector2f PlayerBulletCluster::getSplitDirection(int index) const {
     float angle = 3.14159f * 2.f * index / splitCount + 0.3f;
     return sf::Vector2f(std::cos(angle), std::sin(angle));

@@ -86,7 +86,6 @@ private:
     float homingCooldown;
 
     WeaponType currentWeapon;
-    WeaponType secondaryWeapon;
 
     int hp;
     int maxHP;
@@ -113,16 +112,6 @@ private:
     int comboCount;
     float comboTimer;
     int lastHitTargetId;
-
-    // Spread bounce tracking (bullet index -> bounced bool)
-    std::vector<bool> spreadBounced;
-
-    // Piercing chain tracking
-    int lastPiercingTargetId;
-
-    // Orbital accumulated damage & hit flags
-    int orbitalAccumulatedDamage[4];
-    bool orbitalHitThisOrbit[4];
 
     // Homing slow debuff
     int slowStacks;
