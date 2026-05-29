@@ -25,6 +25,7 @@ Game::Game()
     }
 
     hud.init(font);
+    Item::setParticleSystem(&particles);
     prevBossHP = boss.getMaxHP();
     prevPlayerHP = player.getMaxHP();
 
@@ -384,6 +385,7 @@ void Game::update(float dt) {
                 bullet.getPosition(), bullet.getRadius(),
                 boss.getPosition(), boss.getRadius())) {
             boss.takeDamage(bullet.getDamage());
+            audio.playHit();
             particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 255, 100));
             bullet.deactivate();
         }
@@ -396,6 +398,7 @@ void Game::update(float dt) {
                 bullet.getPosition(), bullet.getRadius(),
                 boss.getPosition(), boss.getRadius())) {
             boss.takeDamage(bullet.getDamage());
+            audio.playHit();
             particles.spawnHitSpark(bullet.getPosition(), sf::Color(0, 200, 255));
             bullet.deactivate();
         }
@@ -408,6 +411,7 @@ void Game::update(float dt) {
                 bullet.getPosition(), bullet.getRadius(),
                 boss.getPosition(), boss.getRadius())) {
             boss.takeDamage(bullet.getDamage());
+            audio.playHit();
             particles.spawnHitSpark(bullet.getPosition(), sf::Color(100, 255, 200));
         }
     }
@@ -419,6 +423,7 @@ void Game::update(float dt) {
                 bullet.getPosition(), bullet.getRadius(),
                 boss.getPosition(), boss.getRadius())) {
             boss.takeDamage(bullet.getDamage());
+            audio.playHit();
             particles.spawnHitSpark(bullet.getPosition(), sf::Color(0, 255, 180));
         }
     }
@@ -430,6 +435,7 @@ void Game::update(float dt) {
                 bullet.getPosition(), bullet.getRadius(),
                 boss.getPosition(), boss.getRadius())) {
             boss.takeDamage(bullet.getDamage());
+            audio.playHit();
             particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 150, 50));
             bullet.deactivate();
         }
@@ -442,6 +448,7 @@ void Game::update(float dt) {
                 bullet.getPosition(), bullet.getRadius(),
                 boss.getPosition(), boss.getRadius())) {
             boss.takeDamage(bullet.getDamage());
+            audio.playHit();
             particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 100, 200));
             bullet.deactivate();
         }
