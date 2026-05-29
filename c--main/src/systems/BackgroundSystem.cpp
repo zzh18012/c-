@@ -83,7 +83,8 @@ void BackgroundSystem::update(float dt) {
     for (int i = 0; i < BG_AMBIENT_DOT_COUNT; ++i) {
         float newY = dotBasePositions[i].y - timer * BG_DOT_DRIFT_SPEED;
         newY = fmodf(newY + WINDOW_HEIGHT, WINDOW_HEIGHT);
-        ambientDots[i].setPosition(sf::Vector2f(dotBasePositions[i].x, newY));
+        float newX = dotBasePositions[i].x + std::sin(timer * 0.3f + dotPhases[i]) * 20.f;
+        ambientDots[i].setPosition(sf::Vector2f(newX, newY));
 
         float pulse = (sinf(timer * BG_DOT_PULSE_SPEED + dotPhases[i]) + 1.f) * 0.5f;
         sf::Color c = ambientDots[i].getFillColor();
