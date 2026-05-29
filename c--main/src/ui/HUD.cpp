@@ -198,8 +198,11 @@ void HUD::update(const GameStats& stats) {
 
     bulletTimeText->setString(stats.bulletTimeActive ? "BULLET TIME" : "");
 
-    // Dash cooldown ring
+    // Dash cooldown ring - use arc sweep to show fill progress
     float dashRatio = 1.f - (stats.playerDashCooldown / PLAYER_DASH_COOLDOWN);
+    dashRatio = std::max(0.f, std::min(1.f, dashRatio));
+    int points = static_cast<int>(dashRatio * 59.f) + 1; // 1..60 points
+    dashCooldownRing.setPointCount(points);
     dashCooldownRing.setOutlineColor(
         dashRatio >= 1.f ? sf::Color(0, 255, 200, 220) : sf::Color(0, 180, 220, 120));
 
