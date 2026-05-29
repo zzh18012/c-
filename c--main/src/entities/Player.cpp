@@ -44,14 +44,13 @@ Player::Player()
 void Player::handleInput(float dt, const sf::RenderWindow& window) {
     if (dashing) return;
 
+    static bool qPressed = false;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
-        static bool qPressed = false;
         if (!qPressed) {
             qPressed = true;
             cycleWeapon();
         }
     } else {
-        static bool qPressed = false;
         qPressed = false;
     }
 
@@ -599,12 +598,33 @@ void Player::activateAttackBoost() {
 }
 
 void Player::cycleWeapon() {
-    WeaponType current = currentWeapon;
-    if (current == WeaponType::Normal) currentWeapon = secondaryWeapon;
-    else {
-        secondaryWeapon = current;
-        currentWeapon = WeaponType::Normal;
+    static const WeaponType allWeapons[] = {
+        WeaponType::Normal, WeaponType::Spread, WeaponType::Piercing,
+        WeaponType::Orbital, WeaponType::Cluster, WeaponType::Homing
+    };
+    constexpr int N = 6;
+    for (int i = 0; i < N; ++i) {
+        if (currentWeapon == allWeapons[i]) {
+            currentWeapon = allWeapons[(i + 1) % N];
+            return;
+        }
     }
+    currentWeapon = allWeapons[0];
+}
+
+void Player::cycleWeaponReverse() {
+    static const WeaponType allWeapons[] = {
+        WeaponType::Normal, WeaponType::Spread, WeaponType::Piercing,
+        WeaponType::Orbital, WeaponType::Cluster, WeaponType::Homing
+    };
+    constexpr int N = 6;
+    for (int i = 0; i < N; ++i) {
+        if (currentWeapon == allWeapons[i]) {
+            currentWeapon = allWeapons[(i - 1 + N) % N];
+            return;
+        }
+    }
+    currentWeapon = allWeapons[N - 1];
 }
 
 float Player::getShieldTimer() const { return shieldTimer; }

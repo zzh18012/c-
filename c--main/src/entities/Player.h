@@ -35,6 +35,7 @@ public:
     void activateSpeedCoil();
     void activateAttackBoost();
     void cycleWeapon();
+    void cycleWeaponReverse();
     float getShieldTimer() const;
     float getOverdriveTimer() const;
     float getDashBatteryTimer() const;
