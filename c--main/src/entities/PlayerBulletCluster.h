@@ -1,5 +1,10 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <vector>
+
+#include "core/Config.h"
+
+class Player;
 
 class PlayerBulletCluster {
 public:
@@ -24,4 +29,7 @@ private:
     bool exploded;
     int damage;
     float lifetime;
+
+    std::vector<sf::Vector2f> subBulletOffsets;
+    int subBulletCount;
 };
