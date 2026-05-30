@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "GameStats.h"
 #include "entities/Player.h"
-#include "entities/Boss.h"
+#include "entities/BossManager.h"
 #include "entities/Item.h"
 #include "systems/BackgroundSystem.h"
 #include "systems/ParticleSystem.h"
@@ -32,7 +32,7 @@ private:
     GameStats gameStats;
 
     Player player;
-    Boss boss;
+    BossManager bossManager;
     std::vector<Item> items;
     float itemSpawnTimer;
     float bulletTimeTimer;
@@ -51,9 +51,10 @@ private:
     Menu menu;
 
     // Track previous state for effect triggers
-    int prevBossHP = 0;
     int prevBossPhase = 1;
     int prevPlayerHP = 0;
+
+    Difficulty currentDifficulty = Difficulty::Normal;
 
     // Screen flash effect
     float screenFlashTimer = 0.f;

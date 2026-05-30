@@ -24,6 +24,7 @@ public:
 
     std::vector<Button>& getButtons();
     Button& getButton(int index);
+    Difficulty getSelectedDifficulty() const { return selectedDifficulty; }
 
 private:
     void buildMainMenu(const sf::Font& font);

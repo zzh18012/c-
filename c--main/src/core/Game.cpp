@@ -26,16 +26,21 @@ Game::Game()
 
     hud.init(font);
     Item::setParticleSystem(&particles);
-    prevBossHP = boss.getMaxHP();
     prevPlayerHP = player.getMaxHP();
 
     // Show main menu
     menu.show(MenuMode::MainMenu, font);
-    menu.getButton(0) = Button("START GAME", font,
-        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 300.f),
-        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { startGame(); });
-    menu.getButton(1) = Button("QUIT", font,
-        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 300.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
+    menu.getButton(0) = Button("NORMAL", font,
+        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f),
+        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Normal; startGame(); });
+    menu.getButton(1) = Button("HARD", font,
+        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
+        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Hard; startGame(); });
+    menu.getButton(2) = Button("LUNATIC", font,
+        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + 2 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
+        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Lunatic; startGame(); });
+    menu.getButton(3) = Button("QUIT", font,
+        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + 3 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
         sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { window.close(); });
 }
 
@@ -54,8 +59,7 @@ void Game::run() {
 void Game::startGame() {
     state = GameState::Playing;
     menu.setVisible(false);
-    prevBossPhase = boss.getPhase();
-    prevBossHP = boss.getHP();
+    bossManager.init(currentDifficulty);
     prevPlayerHP = player.getHP();
     audio.startBackgroundMusic();
 }
@@ -63,8 +67,8 @@ void Game::startGame() {
 void Game::resetGame() {
     // Recreate player
     player = Player();
-    // Recreate boss
-    boss = Boss();
+    // Reset boss manager
+    bossManager = BossManager();
     // Reset items
     for (auto& item : items) item.deactivate();
     itemSpawnTimer = ITEM_SPAWN_INTERVAL;
@@ -76,7 +80,6 @@ void Game::resetGame() {
 
     // Reset GameStats
     gameStats = GameStats();
-    prevBossHP = boss.getMaxHP();
     prevBossPhase = 1;
     prevPlayerHP = player.getMaxHP();
 
@@ -109,25 +112,27 @@ void Game::processEvents() {
                             menu.getButton(1) = Button("QUIT TO MENU", font,
                                 sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 320.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
                                 sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { resetGame(); state = GameState::MainMenu; menu.show(MenuMode::MainMenu, font);
-                                    menu.getButton(0) = Button("START GAME", font,
-                                        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 300.f),
-                                        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { startGame(); });
-                                    menu.getButton(1) = Button("QUIT", font,
-                                        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 300.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
+                                    menu.getButton(0) = Button("NORMAL", font,
+                                        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f),
+                                        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Normal; startGame(); });
+                                    menu.getButton(1) = Button("HARD", font,
+                                        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
+                                        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Hard; startGame(); });
+                                    menu.getButton(2) = Button("LUNATIC", font,
+                                        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + 2 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
+                                        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Lunatic; startGame(); });
+                                    menu.getButton(3) = Button("QUIT", font,
+                                        sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + 3 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
                                         sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { window.close(); });
                                 });
                             break;
 
                         // Debug hotkeys
                         case sf::Keyboard::Key::F1: player.heal(PLAYER_MAX_HP); break;
-                        case sf::Keyboard::Key::F2: boss.takeDamage(boss.getHP() * 0.4f); break;
                         case sf::Keyboard::Key::F3:
                             godModeActive = !godModeActive;
                             player.setGodMode(godModeActive);
                             break;
-                        case sf::Keyboard::Key::F4: boss.clearAllBullets(); break;
-                        case sf::Keyboard::Key::F5: boss.takeDamage(boss.getHP() / 2); break;
-                        case sf::Keyboard::Key::F6: boss.takeDamage(boss.getHP()); break;
                         default: break;
                     }
                 }
@@ -173,17 +178,16 @@ void Game::update(float dt) {
     gameStats.elapsedTime += dt;
     player.handleInput(dt, window);
     player.update(dt);
-    boss.update(dt, player.getPosition());
+    bossManager.update(dt, player.getPosition());
 
     // Track previous state for effect triggers
-    int bossPhaseBefore = boss.getPhase();
     int playerHPBefore = player.getHP();
 
     // Bullet Time countdown
     if (bulletTimeTimer > 0.f) {
         bulletTimeTimer -= dt;
         if (bulletTimeTimer <= 0.f) {
-            boss.setBulletSpeedMultiplier(1.f);
+            bossManager.clearAllBullets();
         }
     }
 
@@ -212,8 +216,14 @@ void Game::update(float dt) {
         }
     }
 
-    // Forced Heal Core spawns at HP thresholds
-    float hpRatio = static_cast<float>(boss.getHP()) / boss.getMaxHP();
+    // Forced Heal Core spawns at HP thresholds (check lowest HP boss)
+    float lowestHPRatio = 1.f;
+    for (auto& b : bossManager.getBosses()) {
+        if (!b.isDead()) {
+            float ratio = static_cast<float>(b.getHP()) / b.getMaxHP();
+            if (ratio < lowestHPRatio) lowestHPRatio = ratio;
+        }
+    }
     auto spawnHealCore = [&]() {
         for (auto& item : items) {
             if (!item.isActive()) {
@@ -225,15 +235,15 @@ void Game::update(float dt) {
         }
     };
 
-    if (!healSpawnedAt75 && hpRatio <= 0.75f) {
+    if (!healSpawnedAt75 && lowestHPRatio <= 0.75f) {
         healSpawnedAt75 = true;
         spawnHealCore();
     }
-    if (!healSpawnedAt50 && hpRatio <= 0.50f) {
+    if (!healSpawnedAt50 && lowestHPRatio <= 0.50f) {
         healSpawnedAt50 = true;
         spawnHealCore();
     }
-    if (!healSpawnedAt25 && hpRatio <= 0.25f) {
+    if (!healSpawnedAt25 && lowestHPRatio <= 0.25f) {
         healSpawnedAt25 = true;
         spawnHealCore();
     }
@@ -245,9 +255,14 @@ void Game::update(float dt) {
         int activeCount = 0;
         for (const auto& item : items) if (item.isActive()) activeCount++;
         if (activeCount < ITEM_MAX_COUNT) {
+            // Get max phase among alive bosses
+            int maxPhase = 1;
+            for (auto& b : bossManager.getBosses()) {
+                if (!b.isDead() && b.getPhase() > maxPhase) maxPhase = b.getPhase();
+            }
             for (auto& item : items) {
                 if (!item.isActive()) {
-                    int phase = boss.getPhase();
+                    int phase = maxPhase;
                     ItemType type;
                     if (phase == 1) {
                         int r = rand() % 5;
@@ -314,15 +329,17 @@ void Game::update(float dt) {
                     particles.spawnExplosion(player.getPosition(), sf::Color(255, 100, 40), 25);
                     break;
                 case ItemType::BulletTime:
-                    boss.setBulletSpeedMultiplier(BULLET_TIME_SLOW_RATIO);
+                    bossManager.clearAllBullets();
                     bulletTimeTimer = BULLET_TIME_DURATION;
                     screenFlashTimer = 0.2f;
                     screenFlashColor = sf::Color(180, 60, 255, 110);
                     particles.spawnExplosion(player.getPosition(), sf::Color(180, 60, 255), 20);
                     break;
                 case ItemType::NovaBomb:
-                    boss.clearAllBullets();
-                    boss.takeDamage(NOVA_BOMB_DAMAGE);
+                    bossManager.clearAllBullets();
+                    for (auto& boss : bossManager.getBosses()) {
+                        if (!boss.isDead()) boss.takeDamage(NOVA_BOMB_DAMAGE);
+                    }
                     novaRingActive = true;
                     novaRingRadius = 0.f;
                     novaRingColor = sf::Color(255, 255, 100);
@@ -362,8 +379,10 @@ void Game::update(float dt) {
                     break;
                 case ItemType::NovaCore:
                     player.activateNovaForm();
-                    boss.clearAllBullets();
-                    boss.takeDamage(NOVA_FORM_DAMAGE);
+                    bossManager.clearAllBullets();
+                    for (auto& boss : bossManager.getBosses()) {
+                        if (!boss.isDead()) boss.takeDamage(NOVA_FORM_DAMAGE);
+                    }
                     novaRingActive = true;
                     novaRingRadius = 0.f;
                     novaRingColor = sf::Color(255, 150, 50);
@@ -380,40 +399,51 @@ void Game::update(float dt) {
     // Player bullets vs Boss collision
     for (auto& bullet : player.getBullets()) {
         if (!bullet.isActive()) continue;
-        if (CollisionSystem::checkCircleCollision(
-                bullet.getPosition(), bullet.getRadius(),
-                boss.getPosition(), boss.getRadius())) {
-            player.registerHit(0);
-            int dmg = static_cast<int>(bullet.getDamage() * player.getComboDamageMultiplier());
-            boss.takeDamage(dmg);
-            audio.playHit();
-            particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 255, 100));
-            bullet.deactivate();
+        for (auto& boss : bossManager.getBosses()) {
+            if (boss.isDead()) continue;
+            if (CollisionSystem::checkCircleCollision(
+                    bullet.getPosition(), bullet.getRadius(),
+                    boss.getPosition(), boss.getRadius())) {
+                player.registerHit(0);
+                int dmg = static_cast<int>(bullet.getDamage() * player.getComboDamageMultiplier());
+                boss.takeDamage(dmg);
+                audio.playHit();
+                particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 255, 100));
+                bullet.deactivate();
+                break;
+            }
         }
     }
 
     // Player spread bullets vs Boss collision
     for (auto& bullet : player.getSpreadBullets()) {
         if (!bullet.isActive()) continue;
-        if (CollisionSystem::checkCircleCollision(
-                bullet.getPosition(), bullet.getRadius(),
-                boss.getPosition(), boss.getRadius())) {
-            boss.takeDamage(bullet.getDamage() * player.getComboDamageMultiplier());
-            audio.playHit();
-            particles.spawnHitSpark(bullet.getPosition(), sf::Color(0, 200, 255));
-            bullet.deactivate();
+        for (auto& boss : bossManager.getBosses()) {
+            if (boss.isDead()) continue;
+            if (CollisionSystem::checkCircleCollision(
+                    bullet.getPosition(), bullet.getRadius(),
+                    boss.getPosition(), boss.getRadius())) {
+                boss.takeDamage(bullet.getDamage() * player.getComboDamageMultiplier());
+                audio.playHit();
+                particles.spawnHitSpark(bullet.getPosition(), sf::Color(0, 200, 255));
+                bullet.deactivate();
+                break;
+            }
         }
     }
 
     // Player piercing bullets vs Boss collision
     for (auto& bullet : player.getPiercingBullets()) {
         if (!bullet.isActive()) continue;
-        if (CollisionSystem::checkCircleCollision(
-                bullet.getPosition(), bullet.getRadius(),
-                boss.getPosition(), boss.getRadius())) {
-            boss.takeDamage(bullet.getDamage());
-            audio.playHit();
-            particles.spawnHitSpark(bullet.getPosition(), sf::Color(100, 255, 200));
+        for (auto& boss : bossManager.getBosses()) {
+            if (boss.isDead()) continue;
+            if (CollisionSystem::checkCircleCollision(
+                    bullet.getPosition(), bullet.getRadius(),
+                    boss.getPosition(), boss.getRadius())) {
+                boss.takeDamage(bullet.getDamage());
+                audio.playHit();
+                particles.spawnHitSpark(bullet.getPosition(), sf::Color(100, 255, 200));
+            }
         }
     }
 
@@ -422,17 +452,26 @@ void Game::update(float dt) {
         int totalOrbitalDamage = 0;
         for (auto& bullet : player.getOrbitalBullets()) {
             if (!bullet.isActive()) continue;
-            if (CollisionSystem::checkCircleCollision(
-                    bullet.getPosition(), bullet.getRadius(),
-                    boss.getPosition(), boss.getRadius())) {
-                totalOrbitalDamage += bullet.getDamage();
-                totalOrbitalDamage += bullet.getOrbitCount() * 5;
-                bullet.resetOrbitCount();
-                bullet.deactivate();
+            for (auto& boss : bossManager.getBosses()) {
+                if (boss.isDead()) continue;
+                if (CollisionSystem::checkCircleCollision(
+                        bullet.getPosition(), bullet.getRadius(),
+                        boss.getPosition(), boss.getRadius())) {
+                    totalOrbitalDamage += bullet.getDamage();
+                    totalOrbitalDamage += bullet.getOrbitCount() * 5;
+                    bullet.resetOrbitCount();
+                    bullet.deactivate();
+                    break;
+                }
             }
         }
         if (totalOrbitalDamage > 0) {
-            boss.takeDamage(totalOrbitalDamage);
+            for (auto& boss : bossManager.getBosses()) {
+                if (!boss.isDead()) {
+                    boss.takeDamage(totalOrbitalDamage);
+                    break;
+                }
+            }
             audio.playHit();
         }
     }
@@ -440,49 +479,66 @@ void Game::update(float dt) {
     // Player cluster bullets vs Boss collision
     for (auto& bullet : player.getClusterBullets()) {
         if (!bullet.isActive()) continue;
-        if (CollisionSystem::checkCircleCollision(
-                bullet.getPosition(), bullet.getRadius(),
-                boss.getPosition(), boss.getRadius())) {
-            boss.takeDamage(bullet.getDamage());
-            audio.playHit();
-            particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 150, 50));
-            bullet.deactivate();
+        for (auto& boss : bossManager.getBosses()) {
+            if (boss.isDead()) continue;
+            if (CollisionSystem::checkCircleCollision(
+                    bullet.getPosition(), bullet.getRadius(),
+                    boss.getPosition(), boss.getRadius())) {
+                boss.takeDamage(bullet.getDamage());
+                audio.playHit();
+                particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 150, 50));
+                bullet.deactivate();
+                break;
+            }
         }
     }
 
     // Player homing bullets vs Boss collision
     for (auto& bullet : player.getHomingBullets()) {
         if (!bullet.isActive()) continue;
-        if (CollisionSystem::checkCircleCollision(
-                bullet.getPosition(), bullet.getRadius(),
-                boss.getPosition(), boss.getRadius())) {
-            boss.takeDamage(bullet.getDamage());
-            boss.applySlow(1);
-            audio.playHit();
-            particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 100, 200));
-            bullet.deactivate();
+        for (auto& boss : bossManager.getBosses()) {
+            if (boss.isDead()) continue;
+            if (CollisionSystem::checkCircleCollision(
+                    bullet.getPosition(), bullet.getRadius(),
+                    boss.getPosition(), boss.getRadius())) {
+                boss.takeDamage(bullet.getDamage());
+                boss.applySlow(1);
+                audio.playHit();
+                particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 100, 200));
+                bullet.deactivate();
+                break;
+            }
         }
     }
 
     // Boss bullets vs Player collision
-    for (auto& bullet : boss.getBullets()) {
-        if (!bullet.isActive()) continue;
-        if (CollisionSystem::checkCircleCollision(
-                bullet.getPosition(), bullet.getRadius(),
-                player.getPosition(), player.getRadius())) {
-            player.takeDamage(bullet.getDamage());
-            particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 60, 40));
-            bullet.deactivate();
+    for (auto& boss : bossManager.getBosses()) {
+        if (boss.isDead()) continue;
+        for (auto& bullet : boss.getBullets()) {
+            if (!bullet.isActive()) continue;
+            if (CollisionSystem::checkCircleCollision(
+                    bullet.getPosition(), bullet.getRadius(),
+                    player.getPosition(), player.getRadius())) {
+                player.takeDamage(bullet.getDamage());
+                particles.spawnHitSpark(bullet.getPosition(), sf::Color(255, 60, 40));
+                bullet.deactivate();
+            }
         }
     }
 
     // Boss phase change trigger
-    if (boss.getPhase() != bossPhaseBefore && boss.getPhase() > bossPhaseBefore) {
-        particles.spawnPhaseTransition(boss.getPosition());
-        particles.spawnExplosion(boss.getPosition(), sf::Color(255, 255, 255, 200), 25);
-        cameraShake.shake(8.f, 0.4f);
-        screenFlashTimer = 0.3f;
-        screenFlashColor = sf::Color(255, 200, 220, 150);
+    for (auto& boss : bossManager.getBosses()) {
+        if (boss.isDead()) continue;
+        int currentPhase = boss.getPhase();
+        if (currentPhase > prevBossPhase) {
+            particles.spawnPhaseTransition(boss.getPosition());
+            particles.spawnExplosion(boss.getPosition(), sf::Color(255, 255, 255, 200), 25);
+            cameraShake.shake(8.f, 0.4f);
+            screenFlashTimer = 0.3f;
+            screenFlashColor = sf::Color(255, 200, 220, 150);
+            prevBossPhase = currentPhase;
+            break;
+        }
     }
 
     // Player hit trigger
@@ -492,11 +548,16 @@ void Game::update(float dt) {
     }
 
     // Victory / GameOver check
-    if (boss.isDead() && state == GameState::Playing) {
+    if (bossManager.isAllBossesDead() && state == GameState::Playing) {
         gameStats.victory = true;
         state = GameState::Victory;
-        boss.clearAllBullets();
-        particles.spawnExplosion(boss.getPosition(), sf::Color(255, 140, 30), 60);
+        bossManager.clearAllBullets();
+        for (auto& boss : bossManager.getBosses()) {
+            if (!boss.isDead()) {
+                particles.spawnExplosion(boss.getPosition(), sf::Color(255, 140, 30), 60);
+                break;
+            }
+        }
         cameraShake.shake(15.f, 0.8f);
         audio.stopBackgroundMusic();
         audio.playVictory();
@@ -507,18 +568,24 @@ void Game::update(float dt) {
         menu.getButton(1) = Button("MAIN MENU", font,
             sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 340.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
             sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { resetGame(); state = GameState::MainMenu; menu.show(MenuMode::MainMenu, font);
-                menu.getButton(0) = Button("START GAME", font,
-                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 300.f),
-                    sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { startGame(); });
-                menu.getButton(1) = Button("QUIT", font,
-                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 300.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
+                menu.getButton(0) = Button("NORMAL", font,
+                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f),
+                    sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Normal; startGame(); });
+                menu.getButton(1) = Button("HARD", font,
+                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
+                    sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Hard; startGame(); });
+                menu.getButton(2) = Button("LUNATIC", font,
+                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + 2 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
+                    sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Lunatic; startGame(); });
+                menu.getButton(3) = Button("QUIT", font,
+                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + 3 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
                     sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { window.close(); });
             });
     }
     if (player.isDead() && state == GameState::Playing) {
         gameStats.gameOver = true;
         state = GameState::GameOver;
-        boss.clearAllBullets();
+        bossManager.clearAllBullets();
         particles.spawnExplosion(player.getPosition(), sf::Color(255, 50, 40), 30);
         cameraShake.shake(10.f, 0.6f);
         audio.stopBackgroundMusic();
@@ -530,11 +597,17 @@ void Game::update(float dt) {
         menu.getButton(1) = Button("MAIN MENU", font,
             sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 340.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
             sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { resetGame(); state = GameState::MainMenu; menu.show(MenuMode::MainMenu, font);
-                menu.getButton(0) = Button("START GAME", font,
-                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 300.f),
-                    sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { startGame(); });
-                menu.getButton(1) = Button("QUIT", font,
-                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 300.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
+                menu.getButton(0) = Button("NORMAL", font,
+                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f),
+                    sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Normal; startGame(); });
+                menu.getButton(1) = Button("HARD", font,
+                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
+                    sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Hard; startGame(); });
+                menu.getButton(2) = Button("LUNATIC", font,
+                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + 2 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
+                    sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { currentDifficulty = Difficulty::Lunatic; startGame(); });
+                menu.getButton(3) = Button("QUIT", font,
+                    sf::Vector2f(WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f, 240.f + 3 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
                     sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), [this]() { window.close(); });
             });
     }
@@ -552,18 +625,25 @@ void Game::update(float dt) {
     gameStats.playerFireRateMultiplier = player.getFireRateMultiplier();
     gameStats.playerDamageMultiplier = player.getDamageMultiplier();
     gameStats.bulletTimeActive = bulletTimeTimer > 0.f;
-    gameStats.bossHP = boss.getHP();
-    gameStats.bossMaxHP = boss.getMaxHP();
-    gameStats.bossPhase = boss.getPhase();
-    gameStats.bossLaserWarning = boss.isLaserWarning();
-    gameStats.bossLaserActive = boss.isLaserActive();
-    gameStats.bossActive = !boss.isDead();
-    gameStats.currentAttack = boss.getCurrentAttackType();
-    gameStats.currentAttackName = boss.getCurrentAttackName();
+
+    // Multi-boss stats sync
+    gameStats.multiBossStats.activeCount = bossManager.getActiveBossCount();
+    int idx = 0;
+    for (auto& boss : bossManager.getBosses()) {
+        if (!boss.isDead() && idx < MAX_BOSS_COUNT) {
+            gameStats.multiBossStats.bosses[idx].hp = boss.getHP();
+            gameStats.multiBossStats.bosses[idx].maxHP = boss.getMaxHP();
+            gameStats.multiBossStats.bosses[idx].phase = boss.getPhase();
+            gameStats.multiBossStats.bosses[idx].active = true;
+            gameStats.multiBossStats.bosses[idx].attackName = boss.getCurrentAttackName();
+            gameStats.multiBossStats.bosses[idx].laserWarning = boss.isLaserWarning();
+            gameStats.multiBossStats.bosses[idx].laserActive = boss.isLaserActive();
+            idx++;
+        }
+    }
+    gameStats.multiBossStats.difficulty = currentDifficulty;
 
     // Update previous trackers
-    prevBossHP = boss.getHP();
-    prevBossPhase = boss.getPhase();
     prevPlayerHP = player.getHP();
 
     // Update HUD
@@ -587,7 +667,7 @@ void Game::render() {
     window.setView(shakeView);
 
     // Layer 3: Game entities
-    boss.render(window);
+    bossManager.render(window);
     for (const auto& item : items) {
         item.render(window);
     }

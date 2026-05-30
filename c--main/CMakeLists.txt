@@ -14,6 +14,7 @@ add_executable(NeonBulletArena
     src/core/Game.cpp
     src/entities/Player.cpp
     src/entities/Boss.cpp
+    src/entities/BossManager.cpp
     src/entities/PlayerBullet.cpp
     src/entities/PlayerBulletSpread.cpp
     src/entities/PlayerBulletPiercing.cpp
