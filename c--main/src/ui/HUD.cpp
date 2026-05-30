@@ -17,19 +17,28 @@ HUD::HUD() : fontPtr(nullptr) {
     playerBarFill.setPosition(sf::Vector2f(HUD_PADDING, HUD_PADDING));
     playerBarFill.setFillColor(sf::Color(0, 200, 240));
 
-    // Boss HP bar background
-    bossBarBg.setSize(sf::Vector2f(HUD_BOSS_BAR_WIDTH, HUD_BAR_HEIGHT));
-    bossBarBg.setPosition(sf::Vector2f(WINDOW_WIDTH - HUD_PADDING - HUD_BOSS_BAR_WIDTH, HUD_PADDING));
-    bossBarBg.setFillColor(sf::Color(30, 30, 30, 200));
-    bossBarBg.setOutlineThickness(1.f);
-    bossBarBg.setOutlineColor(sf::Color(220, 60, 60));
-
-    bossBarFill.setSize(sf::Vector2f(HUD_BOSS_BAR_WIDTH, HUD_BAR_HEIGHT));
-    bossBarFill.setPosition(sf::Vector2f(WINDOW_WIDTH - HUD_PADDING - HUD_BOSS_BAR_WIDTH, HUD_PADDING));
-    bossBarFill.setFillColor(sf::Color(240, 50, 50));
-
-    // Phase markers
+    // Boss HP bars (stacked vertically)
     float bossBarX = WINDOW_WIDTH - HUD_PADDING - HUD_BOSS_BAR_WIDTH;
+    float bossSpacing = 30.f;
+
+    bossBarBgs.resize(MAX_BOSS_BARS);
+    bossBarFills.resize(MAX_BOSS_BARS);
+
+    for (int i = 0; i < MAX_BOSS_BARS; ++i) {
+        float yPos = HUD_PADDING + i * bossSpacing;
+
+        bossBarBgs[i].setSize(sf::Vector2f(HUD_BOSS_BAR_WIDTH, HUD_BAR_HEIGHT));
+        bossBarBgs[i].setPosition(sf::Vector2f(bossBarX, yPos));
+        bossBarBgs[i].setFillColor(sf::Color(30, 30, 30, 200));
+        bossBarBgs[i].setOutlineThickness(1.f);
+        bossBarBgs[i].setOutlineColor(sf::Color(220, 60, 60));
+
+        bossBarFills[i].setSize(sf::Vector2f(HUD_BOSS_BAR_WIDTH, HUD_BAR_HEIGHT));
+        bossBarFills[i].setPosition(sf::Vector2f(bossBarX, yPos));
+        bossBarFills[i].setFillColor(sf::Color(240, 50, 50));
+    }
+
+    // Phase markers (single boss view)
     float markerY = HUD_PADDING - 4.f;
     float markerH = HUD_BAR_HEIGHT + 8.f;
 
@@ -79,8 +88,6 @@ void HUD::init(const sf::Font& font) {
 
     // Initialize all text objects with the font
     playerHPText.emplace(font, "", HUD_FONT_SIZE_SMALL);
-    bossHPText.emplace(font, "", HUD_FONT_SIZE_SMALL);
-    bossPhaseText.emplace(font, "", HUD_FONT_SIZE_SMALL);
     attackNameText.emplace(font, "", HUD_FONT_SIZE_NORMAL);
     shieldText.emplace(font, "", HUD_FONT_SIZE_SMALL);
     overdriveText.emplace(font, "", HUD_FONT_SIZE_SMALL);
@@ -89,16 +96,38 @@ void HUD::init(const sf::Font& font) {
     timerText.emplace(font, "", HUD_FONT_SIZE_NORMAL);
     endMessageText.emplace(font, "", HUD_FONT_SIZE_LARGE);
 
+    // Initialize boss text arrays using emplace
+    for (int i = 0; i < MAX_BOSS_BARS; ++i) {
+        bossHPTexts[i].emplace(font, "", HUD_FONT_SIZE_SMALL);
+        bossPhaseTexts[i].emplace(font, "", HUD_FONT_SIZE_SMALL);
+        bossNameTexts[i].emplace(font, "", HUD_FONT_SIZE_SMALL);
+    }
+
     // Set initial positions and colors
     playerHPText->setPosition(sf::Vector2f(HUD_PADDING + 6.f, HUD_PADDING + 1.f));
     playerHPText->setFillColor(sf::Color::White);
 
+    // Boss bars stacked vertically
     float bossBarX = WINDOW_WIDTH - HUD_PADDING - HUD_BOSS_BAR_WIDTH;
-    bossHPText->setPosition(sf::Vector2f(bossBarX + 6.f, HUD_PADDING + 1.f));
-    bossHPText->setFillColor(sf::Color::White);
+    float bossSpacing = 30.f;
 
-    bossPhaseText->setPosition(sf::Vector2f(bossBarX - 40.f, HUD_PADDING - 2.f));
-    bossPhaseText->setFillColor(sf::Color(255, 200, 50));
+    for (int i = 0; i < MAX_BOSS_BARS; ++i) {
+        float yPos = HUD_PADDING + i * bossSpacing;
+
+        bossHPTexts[i]->setPosition(sf::Vector2f(bossBarX + 6.f, yPos + 1.f));
+        bossHPTexts[i]->setFillColor(sf::Color::White);
+
+        bossPhaseTexts[i]->setPosition(sf::Vector2f(bossBarX - 40.f, yPos - 2.f));
+        bossPhaseTexts[i]->setFillColor(sf::Color(255, 200, 50));
+
+        bossNameTexts[i]->setPosition(sf::Vector2f(bossBarX + HUD_BOSS_BAR_WIDTH - 6.f, yPos - 2.f));
+        bossNameTexts[i]->setFillColor(sf::Color(255, 80, 40));
+    }
+
+    // Set initial boss names based on default
+    bossNameTexts[0]->setString("INFerno");
+    bossNameTexts[1]->setString("VOID");
+    bossNameTexts[2]->setString("THUNDER");
 
     attackNameText->setPosition(sf::Vector2f(WINDOW_WIDTH / 2.f, 50.f));
     attackNameText->setFillColor(sf::Color(255, 220, 100));
@@ -125,15 +154,14 @@ void HUD::init(const sf::Font& font) {
 void HUD::update(const GameStats& stats) {
     if (!fontPtr) return;
 
+    // Store difficulty
+    currentDifficulty = stats.multiBossStats.difficulty;
+
     // Smooth HP transitions
     float lerpSpeed = HUD_BAR_LERP_SPEED;
     displayedPlayerHP += (static_cast<float>(stats.playerHP) - displayedPlayerHP) * lerpSpeed * 0.016f;
     if (std::fabs(displayedPlayerHP - stats.playerHP) < 0.5f)
         displayedPlayerHP = static_cast<float>(stats.playerHP);
-
-    displayedBossHP += (static_cast<float>(stats.bossHP) - displayedBossHP) * lerpSpeed * 0.016f;
-    if (std::fabs(displayedBossHP - stats.bossHP) < 0.5f)
-        displayedBossHP = static_cast<float>(stats.bossHP);
 
     // Player HP bar
     float playerRatio = displayedPlayerHP / stats.playerMaxHP;
@@ -157,30 +185,55 @@ void HUD::update(const GameStats& stats) {
         playerBarBg.setOutlineColor(sf::Color(0, 180, 220));
     }
 
-    // Boss HP bar
-    float bossRatio = displayedBossHP / stats.bossMaxHP;
-    bossBarFill.setSize(sf::Vector2f(HUD_BOSS_BAR_WIDTH * bossRatio, HUD_BAR_HEIGHT));
+    // Multi-boss HP bars
+    int activeCount = stats.multiBossStats.activeCount;
+    activeBossCount = activeCount;
+    for (int i = 0; i < activeCount; ++i) {
+        const BossState& boss = stats.multiBossStats.bosses[i];
 
-    std::ostringstream bhp;
-    bhp << "HP " << stats.bossHP << "/" << stats.bossMaxHP;
-    bossHPText->setString(bhp.str());
+        // Smooth HP transition
+        displayedBossHPs[i] += (static_cast<float>(boss.hp) - displayedBossHPs[i]) * lerpSpeed * 0.016f;
+        if (std::fabs(displayedBossHPs[i] - boss.hp) < 0.5f)
+            displayedBossHPs[i] = static_cast<float>(boss.hp);
 
-    // Boss phase text
-    std::ostringstream phaseStr;
-    phaseStr << "Phase " << stats.bossPhase;
-    bossPhaseText->setString(phaseStr.str());
+        float bossRatio = boss.maxHP > 0 ? displayedBossHPs[i] / boss.maxHP : 0.f;
+        bossBarFills[i].setSize(sf::Vector2f(HUD_BOSS_BAR_WIDTH * bossRatio, HUD_BAR_HEIGHT));
 
-    // Phase markers highlight when active phase is near
+        // HP text
+        std::ostringstream bhp;
+        bhp << "HP " << boss.hp << "/" << boss.maxHP;
+        bossHPTexts[i]->setString(bhp.str());
+
+        // Phase text
+        std::ostringstream phaseStr;
+        phaseStr << "P" << boss.phase;
+        bossPhaseTexts[i]->setString(phaseStr.str());
+
+        // Boss name colors from Config
+        if (i < 3) {
+            bossNameTexts[i]->setFillColor(BOSS_NAME_COLORS[i]);
+        }
+    }
+
+    // Hide unused bars
+    for (int i = activeCount; i < MAX_BOSS_BARS; ++i) {
+        bossHPTexts[i]->setString("");
+        bossPhaseTexts[i]->setString("");
+    }
+
+    // Phase markers highlight when active phase is near (single boss)
     phaseMarker70.setFillColor(sf::Color(255, 180, 40, 150));
     phaseMarker35.setFillColor(sf::Color(255, 80, 40, 150));
-    if (stats.bossPhase == 2) {
-        phaseMarker70.setFillColor(sf::Color(255, 200, 50, 220));
-    }
-    if (stats.bossPhase == 3) {
-        phaseMarker35.setFillColor(sf::Color(255, 100, 40, 220));
-    }
 
     // Attack name
+    // Check if any boss has laser warning
+    bool anyLaserWarning = false;
+    for (int i = 0; i < stats.multiBossStats.activeCount; ++i) {
+        if (stats.multiBossStats.bosses[i].laserWarning) {
+            anyLaserWarning = true;
+            break;
+        }
+    }
     if (attackNameText) {
         std::string newName = stats.currentAttackName;
         if (newName != lastAttackName) {
@@ -191,7 +244,7 @@ void HUD::update(const GameStats& stats) {
             attackFlashTimer = 0.f;
         }
         attackFlashTimer += 0.016f;
-        if (stats.bossLaserWarning) {
+        if (anyLaserWarning) {
             float flash = (sinf(attackFlashTimer * 8.f) + 1.f) * 0.5f;
             attackNameText->setFillColor(sf::Color(255, static_cast<std::uint8_t>(60 + flash * 195), static_cast<std::uint8_t>(60 + flash * 195)));
         } else {
@@ -254,12 +307,22 @@ void HUD::render(sf::RenderWindow& window) {
     window.draw(playerBarFill);
     if (playerHPText) window.draw(*playerHPText);
 
-    window.draw(bossBarBg);
-    window.draw(bossBarFill);
-    window.draw(phaseMarker70);
-    window.draw(phaseMarker35);
-    if (bossHPText) window.draw(*bossHPText);
-    if (bossPhaseText) window.draw(*bossPhaseText);
+    // Boss HP bars
+    for (int i = 0; i < MAX_BOSS_BARS; ++i) {
+        if (i < activeBossCount) {
+            window.draw(bossBarBgs[i]);
+            window.draw(bossBarFills[i]);
+            if (bossHPTexts[i]) window.draw(*bossHPTexts[i]);
+            if (bossPhaseTexts[i]) window.draw(*bossPhaseTexts[i]);
+            if (bossNameTexts[i]) window.draw(*bossNameTexts[i]);
+        }
+    }
+
+    // Phase markers (only for single boss)
+    if (activeBossCount <= 1) {
+        window.draw(phaseMarker70);
+        window.draw(phaseMarker35);
+    }
 
     // Attack name
     if (attackNameText && attackNameText->getString().getSize() > 0) {
