@@ -12,6 +12,7 @@ public:
     void render(sf::RenderWindow& window) const;
 
     sf::Vector2f getPosition() const;
+    void setPosition(sf::Vector2f pos);
     float getRadius() const;
     int getHP() const;
     int getMaxHP() const;

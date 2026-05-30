@@ -33,6 +33,14 @@ void BossManager::init(Difficulty diff) {
 }
 
 sf::Vector2f BossManager::getRandomSpawnPosition(int bossIndex) const {
+    if (activeBossCount <= 1) {
+        float offsetX = static_cast<float>((std::rand() % 100) - 50);
+        float offsetY = static_cast<float>((std::rand() % 50) - 25);
+        return sf::Vector2f(
+            std::max(BOSS_SPAWN_MIN_X, std::min(BOSS_SPAWN_MAX_X, (BOSS_SPAWN_MIN_X + BOSS_SPAWN_MAX_X) * 0.5f + offsetX)),
+            BOSS_SPAWN_MIN_Y + offsetY
+        );
+    }
     float baseX = BOSS_SPAWN_MIN_X + (BOSS_SPAWN_MAX_X - BOSS_SPAWN_MIN_X) *
                   static_cast<float>(bossIndex) / static_cast<float>(activeBossCount - 1);
     float offsetX = static_cast<float>((std::rand() % 100) - 50);
@@ -44,6 +52,7 @@ sf::Vector2f BossManager::getRandomSpawnPosition(int bossIndex) const {
 }
 
 void BossManager::spawnBoss(int index, sf::Vector2f pos) {
+    bosses[index].setPosition(pos);
     bossActive[index] = true;
 }
 
@@ -58,7 +67,9 @@ void BossManager::update(float dt, const sf::Vector2f& playerPosition) {
 
     // 检查第二波入场条件
     if (difficulty == Difficulty::Lunatic && !secondWaveTriggered && !secondWaveSpawned) {
-        if (!bosses[0].isDead() && bosses[0].getHP() <= bosses[0].getMaxHP() * BOSS_SPAWN_HP_THRESHOLD) {
+        bool hpBelowThreshold = bosses[0].getHP() <= bosses[0].getMaxHP() * BOSS_SPAWN_HP_THRESHOLD;
+        bool bossDiedAfterThreshold = !bosses[0].isDead() || hpBelowThreshold;
+        if (bossDiedAfterThreshold) {
             secondWaveTriggered = true;
             for (int i = 1; i < MAX_BOSS_COUNT; ++i) {
                 if (!bossActive[i]) {

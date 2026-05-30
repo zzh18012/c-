@@ -1053,6 +1053,7 @@ void Boss::renderScreenLock(sf::RenderWindow& window) const {
 }
 
 sf::Vector2f Boss::getPosition() const { return position; }
+void Boss::setPosition(sf::Vector2f pos) { position = pos; }
 float Boss::getRadius() const { return BOSS_RADIUS; }
 int Boss::getHP() const { return hp; }
 int Boss::getMaxHP() const { return maxHP; }
