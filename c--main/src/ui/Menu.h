@@ -4,6 +4,7 @@
 #include <string>
 #include <optional>
 #include "Button.h"
+#include "core/Config.h"
 
 enum class MenuMode { MainMenu, Pause, Victory, GameOver };
 
@@ -12,7 +13,7 @@ public:
     Menu();
     ~Menu();
 
-    void show(MenuMode mode, const sf::Font& font);
+    void show(MenuMode mode, const sf::Font& font, Difficulty diff = Difficulty::Normal);
     void handleEvent(const sf::Event& event, const sf::RenderWindow& window);
     void update(float dt);
     void render(sf::RenderWindow& window) const;
@@ -31,6 +32,7 @@ private:
     void buildGameOverMenu(const sf::Font& font);
 
     MenuMode mode = MenuMode::MainMenu;
+    Difficulty selectedDifficulty = Difficulty::Normal;
     std::optional<sf::Text> title;
     std::vector<Button> buttons;
     int selectedIndex = 0;

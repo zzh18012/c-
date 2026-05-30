@@ -8,8 +8,9 @@ Menu::Menu() {
 
 Menu::~Menu() {}
 
-void Menu::show(MenuMode mode, const sf::Font& font) {
+void Menu::show(MenuMode mode, const sf::Font& font, Difficulty diff) {
     this->mode = mode;
+    selectedDifficulty = diff;
     selectedIndex = 0;
     visible = true;
 
@@ -31,17 +32,23 @@ void Menu::buildMainMenu(const sf::Font& font) {
     title->setFillColor(sf::Color(0, 220, 255));
     sf::FloatRect tb = title->getLocalBounds();
     title->setOrigin(sf::Vector2f(tb.position.x + tb.size.x / 2.f, tb.position.y + tb.size.y / 2.f));
-    title->setPosition(sf::Vector2f(WINDOW_WIDTH / 2.f, 160.f));
+    title->setPosition(sf::Vector2f(WINDOW_WIDTH / 2.f, 140.f));
 
     buttons.clear();
     float btnX = WINDOW_WIDTH / 2.f - BUTTON_WIDTH / 2.f;
-    float startY = 300.f;
+    float startY = 240.f;
 
-    buttons.emplace_back("START GAME", font,
+    buttons.emplace_back("NORMAL", font,
         sf::Vector2f(btnX, startY),
         sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), nullptr);
-    buttons.emplace_back("QUIT", font,
+    buttons.emplace_back("HARD", font,
         sf::Vector2f(btnX, startY + BUTTON_HEIGHT + MENU_BUTTON_SPACING),
+        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), nullptr);
+    buttons.emplace_back("LUNATIC", font,
+        sf::Vector2f(btnX, startY + 2 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
+        sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), nullptr);
+    buttons.emplace_back("QUIT", font,
+        sf::Vector2f(btnX, startY + 3 * (BUTTON_HEIGHT + MENU_BUTTON_SPACING)),
         sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), nullptr);
 }
 
