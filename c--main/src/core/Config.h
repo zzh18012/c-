@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Color.hpp>
 
 // Window
 constexpr int WINDOW_WIDTH = 1280;
@@ -213,3 +214,24 @@ constexpr float CLUSTER_SPLIT_DAMAGE_RATIO = 0.3f;
 constexpr float HOMING_SLOW_STACK = 0.1f;
 constexpr float HOMING_SLOW_DURATION = 2.f;
 constexpr int HOMING_SLOW_MAX_STACKS = 3;
+
+// === 难度模式 ===
+enum class Difficulty { Normal, Hard, Lunatic };
+
+// 难度配置
+constexpr int HARD_BOSS_COUNT = 2;
+constexpr int LUNATIC_BOSS_COUNT = 3;
+constexpr float BOSS_SPAWN_HP_THRESHOLD = 0.5f;  // Boss A血量50%时触发后续BOSS入场
+
+// Boss名称颜色（用于HUD）
+const sf::Color BOSS_NAME_COLORS[3] = {
+    sf::Color(255, 80, 40),    // 烈焰恶魔 - 红橙
+    sf::Color(180, 80, 255),   // 虚空幽灵 - 紫蓝
+    sf::Color(255, 220, 60)    // 雷霆泰坦 - 金黄
+};
+
+// Boss位置随机范围
+constexpr float BOSS_SPAWN_MIN_X = 200.f;
+constexpr float BOSS_SPAWN_MAX_X = WINDOW_WIDTH - 200.f;
+constexpr float BOSS_SPAWN_MIN_Y = 100.f;
+constexpr float BOSS_SPAWN_MAX_Y = 250.f;
