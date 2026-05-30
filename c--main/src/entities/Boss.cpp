@@ -43,6 +43,11 @@ Boss::Boss()
     , pulseTimer(0.f)
     , deformTimer(0.f)
     , eyeTrackAngle(0.f)
+    , bossType(BossType::Inferno)
+    , entranceAnimationProgress(0.f)
+    , entranceAnimationActive(true)
+    , entranceStartPos(BOSS_POS)
+    , entranceTargetPos(BOSS_POS)
 {
     bullets.resize(MAX_BOSS_BULLETS);
 
@@ -772,6 +777,16 @@ void Boss::render(sf::RenderWindow& window) const {
     if (isScreenLocking()) {
         renderScreenLock(window);
     }
+
+    // 入场特效
+    renderEntranceEffect(window);
+
+    // 根据BOSS类型绘制独特光环
+    switch (bossType) {
+        case BossType::Inferno: renderInfernoAura(window); break;
+        case BossType::Void: renderVoidAura(window); break;
+        case BossType::Thunder: renderThunderAura(window); break;
+    }
 }
 
 void Boss::renderAlienBody(sf::RenderWindow& window) const {
@@ -1053,7 +1068,6 @@ void Boss::renderScreenLock(sf::RenderWindow& window) const {
 }
 
 sf::Vector2f Boss::getPosition() const { return position; }
-void Boss::setPosition(sf::Vector2f pos) { position = pos; }
 float Boss::getRadius() const { return BOSS_RADIUS; }
 int Boss::getHP() const { return hp; }
 int Boss::getMaxHP() const { return maxHP; }
@@ -1095,5 +1109,158 @@ float Boss::getSlowMultiplier() const {
 void Boss::clearAllBullets() {
     for (auto& bullet : bullets) {
         bullet.deactivate();
+    }
+}
+
+void Boss::setBossType(BossType type) {
+    bossType = type;
+}
+
+BossType Boss::getBossType() const {
+    return bossType;
+}
+
+void Boss::setEntranceAnimation(float progress) {
+    entranceAnimationProgress = progress;
+    if (progress >= 1.f) {
+        entranceAnimationActive = false;
+        position = entranceTargetPos;
+    } else {
+        position = entranceStartPos + (entranceTargetPos - entranceStartPos) * progress;
+    }
+}
+
+float Boss::getEntranceAnimation() const {
+    return entranceAnimationProgress;
+}
+
+bool Boss::isEntranceComplete() const {
+    return entranceAnimationProgress >= 1.f;
+}
+
+void Boss::setPosition(const sf::Vector2f& pos) {
+    position = pos;
+    entranceStartPos = pos;
+    entranceTargetPos = pos;
+}
+
+void Boss::renderInfernoAura(sf::RenderWindow& window) const {
+    sf::Vector2f pos = position;
+    for (int i = 0; i < 8; ++i) {
+        float angle = pulseTimer * 2.f + (PI * 2.f / 8.f) * i;
+        float dist = BOSS_RADIUS * 1.8f + std::sin(pulseTimer * 3.f + i) * 15.f;
+        float orbX = pos.x + std::cos(angle) * dist;
+        float orbY = pos.y + std::sin(angle) * dist;
+        float orbRadius = 10.f + std::sin(pulseTimer * 4.f + i) * 3.f;
+        sf::CircleShape orb(orbRadius);
+        orb.setOrigin(sf::Vector2f(orbRadius, orbRadius));
+        orb.setPosition(sf::Vector2f(orbX, orbY));
+        orb.setFillColor(sf::Color(255, 100, 30, 180));
+        window.draw(orb);
+    }
+    float auraRadius = BOSS_RADIUS * 2.f + std::sin(pulseTimer * 2.f) * 10.f;
+    sf::CircleShape aura(auraRadius);
+    aura.setOrigin(sf::Vector2f(auraRadius, auraRadius));
+    aura.setPosition(pos);
+    aura.setFillColor(sf::Color(255, 50, 0, 30));
+    window.draw(aura);
+}
+
+void Boss::renderVoidAura(sf::RenderWindow& window) const {
+    sf::Vector2f pos = position;
+    for (int i = 0; i < 12; ++i) {
+        float angle = pulseTimer * 0.8f + (PI * 2.f / 12.f) * i;
+        float dist = BOSS_RADIUS * 1.5f + std::sin(pulseTimer * 1.5f + i * 0.3f) * 20.f;
+        float orbX = pos.x + std::cos(angle) * dist;
+        float orbY = pos.y + std::sin(angle) * dist;
+        float orbRadius = 4.f + std::sin(pulseTimer * 2.f + i) * 2.f;
+        sf::CircleShape orb(orbRadius);
+        orb.setOrigin(sf::Vector2f(orbRadius, orbRadius));
+        orb.setPosition(sf::Vector2f(orbX, orbY));
+        orb.setFillColor(sf::Color(150, 80, 255, 200));
+        window.draw(orb);
+    }
+    float auraRadius = BOSS_RADIUS * 2.2f + std::sin(pulseTimer * 1.5f) * 15.f;
+    sf::CircleShape aura(auraRadius);
+    aura.setOrigin(sf::Vector2f(auraRadius, auraRadius));
+    aura.setPosition(pos);
+    aura.setFillColor(sf::Color(80, 20, 150, 40));
+    window.draw(aura);
+}
+
+void Boss::renderThunderAura(sf::RenderWindow& window) const {
+    sf::Vector2f pos = position;
+    for (int i = 0; i < 6; ++i) {
+        float angle = pulseTimer * 3.f + (PI * 2.f / 6.f) * i;
+        float dist = BOSS_RADIUS * 1.6f + std::sin(pulseTimer * 4.f + i) * 10.f;
+        float orbX = pos.x + std::cos(angle) * dist;
+        float orbY = pos.y + std::sin(angle) * dist;
+        float orbRadius = 8.f + std::sin(pulseTimer * 5.f + i) * 3.f;
+        sf::CircleShape orb(orbRadius);
+        orb.setOrigin(sf::Vector2f(orbRadius, orbRadius));
+        orb.setPosition(sf::Vector2f(orbX, orbY));
+        orb.setFillColor(sf::Color(255, 240, 100, 220));
+        window.draw(orb);
+        sf::RectangleShape lightning(sf::Vector2f(30.f, 3.f));
+        lightning.setOrigin(sf::Vector2f(0.f, 1.5f));
+        lightning.setPosition(sf::Vector2f(orbX, orbY));
+        lightning.setRotation(sf::degrees(angle * 180.f / PI));
+        lightning.setFillColor(sf::Color(255, 255, 100, 150));
+        window.draw(lightning);
+    }
+    float auraRadius = BOSS_RADIUS * 2.1f + std::sin(pulseTimer * 2.5f) * 12.f;
+    sf::CircleShape aura(auraRadius);
+    aura.setOrigin(sf::Vector2f(auraRadius, auraRadius));
+    aura.setPosition(pos);
+    aura.setFillColor(sf::Color(200, 200, 50, 35));
+    window.draw(aura);
+}
+
+void Boss::renderEntranceEffect(sf::RenderWindow& window) const {
+    if (!entranceAnimationActive || entranceAnimationProgress >= 1.f) return;
+    float progress = entranceAnimationProgress;
+    sf::Vector2f pos = position;
+    switch (bossType) {
+        case BossType::Inferno: {
+            sf::Vector2f trailDir = entranceTargetPos - entranceStartPos;
+            float trailLen = std::sqrt(trailDir.x * trailDir.x + trailDir.y * trailDir.y);
+            if (trailLen > 0) trailDir /= trailLen;
+            for (int i = 0; i < 5; ++i) {
+                float t = 1.f - progress + i * 0.1f;
+                if (t > 0 && t < 1.f) {
+                    sf::Vector2f trailPos = entranceStartPos + trailDir * t * trailLen;
+                    float radius = 20.f * (1.f - t) * progress;
+                    sf::CircleShape trail(radius);
+                    trail.setOrigin(sf::Vector2f(radius, radius));
+                    trail.setPosition(trailPos);
+                    trail.setFillColor(sf::Color(255, 100, 30, static_cast<std::uint8_t>(150 * (1.f - t))));
+                    window.draw(trail);
+                }
+            }
+            break;
+        }
+        case BossType::Void: {
+            float crackAlpha = 200.f * progress;
+            sf::RectangleShape crack(sf::Vector2f(WINDOW_WIDTH, 5.f));
+            crack.setPosition(sf::Vector2f(0.f, pos.y));
+            crack.setFillColor(sf::Color(180, 80, 255, static_cast<std::uint8_t>(crackAlpha)));
+            window.draw(crack);
+            sf::RectangleShape crack2(sf::Vector2f(WINDOW_WIDTH, 5.f));
+            crack2.setPosition(sf::Vector2f(0.f, pos.y - 30.f));
+            crack2.setFillColor(sf::Color(150, 60, 255, static_cast<std::uint8_t>(crackAlpha * 0.5f)));
+            window.draw(crack2);
+            break;
+        }
+        case BossType::Thunder: {
+            float waveRadius = BOSS_RADIUS * (1.f + progress * 3.f);
+            sf::CircleShape wave(waveRadius);
+            wave.setOrigin(sf::Vector2f(waveRadius, waveRadius));
+            wave.setPosition(pos);
+            wave.setFillColor(sf::Color(255, 255, 100, static_cast<std::uint8_t>(100 * (1.f - progress))));
+            wave.setOutlineColor(sf::Color(255, 240, 100, static_cast<std::uint8_t>(200 * (1.f - progress))));
+            wave.setOutlineThickness(3.f);
+            window.draw(wave);
+            break;
+        }
     }
 }

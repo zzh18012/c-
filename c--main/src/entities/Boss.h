@@ -5,6 +5,8 @@
 #include "core/GameStats.h"
 #include "BossBullet.h"
 
+enum class BossType { Inferno, Void, Thunder };
+
 class Boss {
 public:
     Boss();
@@ -12,7 +14,7 @@ public:
     void render(sf::RenderWindow& window) const;
 
     sf::Vector2f getPosition() const;
-    void setPosition(sf::Vector2f pos);
+    void setPosition(const sf::Vector2f& pos);
     float getRadius() const;
     int getHP() const;
     int getMaxHP() const;
@@ -39,6 +41,18 @@ public:
     sf::Vector2f getChargeBeamTarget() const;
     float getTentacleSweepY() const;
     float getScreenLockProgress() const;
+
+    void setBossType(BossType type);
+    BossType getBossType() const;
+    void setEntranceAnimation(float progress);
+    float getEntranceAnimation() const;
+    bool isEntranceComplete() const;
+
+    // Aura rendering methods
+    void renderInfernoAura(sf::RenderWindow& window) const;
+    void renderVoidAura(sf::RenderWindow& window) const;
+    void renderThunderAura(sf::RenderWindow& window) const;
+    void renderEntranceEffect(sf::RenderWindow& window) const;
 
 private:
     void updateAttackPattern(float dt, const sf::Vector2f& playerPos);
@@ -122,4 +136,11 @@ private:
     float pulseTimer;
     float deformTimer;
     float eyeTrackAngle;
+
+    // Boss type and entrance animation
+    BossType bossType;
+    float entranceAnimationProgress;
+    bool entranceAnimationActive;
+    sf::Vector2f entranceStartPos;
+    sf::Vector2f entranceTargetPos;
 };
