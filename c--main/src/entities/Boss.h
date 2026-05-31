@@ -47,6 +47,8 @@ public:
     void setEntranceAnimation(float progress);
     float getEntranceAnimation() const;
     bool isEntranceComplete() const;
+    void setEntranceStartPos(const sf::Vector2f& pos);
+    void setEntranceTargetPos(const sf::Vector2f& pos);
 
     // Aura rendering methods
     void renderInfernoAura(sf::RenderWindow& window) const;

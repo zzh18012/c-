@@ -793,15 +793,16 @@ void Boss::renderAlienBody(sf::RenderWindow& window) const {
     sf::Vector2f pos = position;
 
     sf::Color bodyColor, innerColor;
-    if (phase == 1) {
-        bodyColor = sf::Color(140, 40, 60);
-        innerColor = sf::Color(200, 60, 90);
-    } else if (phase == 2) {
-        bodyColor = sf::Color(160, 30, 80);
-        innerColor = sf::Color(220, 50, 110);
-    } else {
-        bodyColor = sf::Color(190, 20, 100);
-        innerColor = sf::Color(255, 40, 130);
+    // Colors based on boss type
+    if (bossType == BossType::Inferno) {
+        bodyColor = sf::Color(200, 60, 20);
+        innerColor = sf::Color(255, 100, 40);
+    } else if (bossType == BossType::Void) {
+        bodyColor = sf::Color(100, 40, 180);
+        innerColor = sf::Color(160, 100, 255);
+    } else { // Thunder
+        bodyColor = sf::Color(180, 160, 40);
+        innerColor = sf::Color(240, 220, 80);
     }
 
     float deformScale = 1.f + std::sin(deformTimer * 2.f) * 0.03f;
@@ -851,6 +852,19 @@ void Boss::renderAlienEye(sf::RenderWindow& window) const {
     sf::Vector2f pos = position;
     float baseRadius = BOSS_RADIUS;
 
+    // Eye colors based on boss type
+    sf::Color eyeballColor, irisColor;
+    if (bossType == BossType::Inferno) {
+        eyeballColor = sf::Color(255, 200, 100);
+        irisColor = sf::Color(255, 80, 20);
+    } else if (bossType == BossType::Void) {
+        eyeballColor = sf::Color(200, 150, 255);
+        irisColor = sf::Color(100, 40, 200);
+    } else { // Thunder
+        eyeballColor = sf::Color(255, 255, 200);
+        irisColor = sf::Color(255, 220, 50);
+    }
+
     sf::CircleShape socket(baseRadius * 0.55f);
     socket.setOrigin(sf::Vector2f(baseRadius * 0.55f, baseRadius * 0.55f));
     socket.setPosition(sf::Vector2f(pos.x, pos.y - 5.f));
@@ -860,7 +874,7 @@ void Boss::renderAlienEye(sf::RenderWindow& window) const {
     sf::CircleShape eyeball(baseRadius * 0.42f);
     eyeball.setOrigin(sf::Vector2f(baseRadius * 0.42f, baseRadius * 0.42f));
     eyeball.setPosition(sf::Vector2f(pos.x, pos.y - 5.f));
-    eyeball.setFillColor(sf::Color(230, 180, 200));
+    eyeball.setFillColor(eyeballColor);
     window.draw(eyeball);
 
     float irisDist = baseRadius * 0.2f;
@@ -870,7 +884,7 @@ void Boss::renderAlienEye(sf::RenderWindow& window) const {
     sf::CircleShape iris(baseRadius * 0.25f);
     iris.setOrigin(sf::Vector2f(baseRadius * 0.25f, baseRadius * 0.25f));
     iris.setPosition(sf::Vector2f(irisX, irisY));
-    iris.setFillColor(sf::Color(180, 30, 50));
+    iris.setFillColor(irisColor);
     window.draw(iris);
 
     sf::CircleShape pupil(baseRadius * 0.12f);
@@ -939,9 +953,14 @@ void Boss::renderAlienTentacles(sf::RenderWindow& window) const {
             if (phase == 2) alpha = 220 - seg * 20;
             if (phase == 3) alpha = 240 - seg * 20;
 
-            sf::Color tentacleColor(120, 30, 50, static_cast<std::uint8_t>(alpha));
-            if (phase == 2) tentacleColor = sf::Color(140, 25, 70, static_cast<std::uint8_t>(alpha));
-            if (phase == 3) tentacleColor = sf::Color(170, 20, 90, static_cast<std::uint8_t>(alpha));
+            sf::Color tentacleColor;
+            if (bossType == BossType::Inferno) {
+                tentacleColor = sf::Color(180, 50, 20, static_cast<std::uint8_t>(alpha));
+            } else if (bossType == BossType::Void) {
+                tentacleColor = sf::Color(80, 40, 160, static_cast<std::uint8_t>(alpha));
+            } else { // Thunder
+                tentacleColor = sf::Color(160, 140, 40, static_cast<std::uint8_t>(alpha));
+            }
 
             segment.setFillColor(tentacleColor);
             window.draw(segment);
@@ -1118,6 +1137,14 @@ void Boss::setBossType(BossType type) {
 
 BossType Boss::getBossType() const {
     return bossType;
+}
+
+void Boss::setEntranceStartPos(const sf::Vector2f& pos) {
+    entranceStartPos = pos;
+}
+
+void Boss::setEntranceTargetPos(const sf::Vector2f& pos) {
+    entranceTargetPos = pos;
 }
 
 void Boss::setEntranceAnimation(float progress) {

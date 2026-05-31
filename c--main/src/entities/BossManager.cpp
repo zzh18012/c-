@@ -19,16 +19,27 @@ void BossManager::init(Difficulty diff) {
     secondWaveTriggered = false;
     spawnTimer.restart();
 
-    int bossCount = (diff == Difficulty::Hard) ? HARD_BOSS_COUNT : LUNATIC_BOSS_COUNT;
+    int bossCount = 1; // Normal = 1 boss
+    if (diff == Difficulty::Hard) bossCount = HARD_BOSS_COUNT;
+    else if (diff == Difficulty::Lunatic) bossCount = LUNATIC_BOSS_COUNT;
     activeBossCount = bossCount;
 
     for (int i = 0; i < MAX_BOSS_COUNT; ++i) {
-        bossActive[i] = (i < bossCount);
+        bossActive[i] = false;
         spawnProgress[i] = 0.f;
-        if (i < bossCount) {
-            sf::Vector2f pos = getRandomSpawnPosition(i);
-            spawnBoss(i, pos);
-        }
+    }
+
+    // BossType mapping: Inferno=0, Void=1, Thunder=2
+    BossType types[3] = { BossType::Inferno, BossType::Void, BossType::Thunder };
+
+    for (int i = 0; i < bossCount; ++i) {
+        sf::Vector2f pos = getRandomSpawnPosition(i);
+        bosses[i].setPosition(pos);
+        bosses[i].setBossType(types[i]);
+        bosses[i].setEntranceAnimation(0.f); // Start entrance animation
+        bosses[i].setEntranceStartPos(sf::Vector2f(pos.x, WINDOW_HEIGHT + 100.f)); // Start from below screen
+        bosses[i].setEntranceTargetPos(pos);
+        bossActive[i] = true;
     }
 }
 
@@ -62,6 +73,7 @@ void BossManager::update(float dt, const sf::Vector2f& playerPosition) {
         if (bossActive[i] && spawnProgress[i] < 1.f) {
             spawnProgress[i] += dt * 0.5f;  // 2秒入场动画
             if (spawnProgress[i] > 1.f) spawnProgress[i] = 1.f;
+            bosses[i].setEntranceAnimation(spawnProgress[i]);
         }
     }
 
