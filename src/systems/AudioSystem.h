@@ -83,8 +83,22 @@ private:
     sf::SoundBuffer victoryBuffer;     // 胜利：和弦
     sf::SoundBuffer gameOverBuffer;    // 失败：轰鸣
 
+    // ---- 音频播放器（保持存活直到播放完毕）----
+    // 高频音效使用池防止重叠截断
+    static const int SHOOT_POOL = 4;
+    static const int HIT_POOL = 2;
+    sf::Sound shootSounds[SHOOT_POOL]; int shootSlot = 0;
+    sf::Sound hitSounds[HIT_POOL];     int hitSlot = 0;
+    sf::Sound pickupSound;
+    sf::Sound playerHurtSound;
+    sf::Sound bossHurtSound;
+    sf::Sound dashSound;
+    sf::Sound overdriveSound;
+    sf::Sound shieldSound;
+    sf::Sound victorySound;
+    sf::Sound gameOverSound;
+
     // ---- 初始化状态 ----
-    // soundsInitialized保证ensureSoundsInitialized只执行一次
     bool soundsInitialized = false;
 
     // ============================================================

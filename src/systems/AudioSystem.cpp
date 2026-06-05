@@ -143,6 +143,7 @@ void AudioSystem::ensureSoundsInitialized() {
             buf[i] = static_cast<int16_t>(s * env * 18000.f);
         }
         shootBuffer.loadFromSamples(buf.data(), buf.size(), 1, SAMPLE_RATE);
+        for (int i = 0; i < SHOOT_POOL; i++) shootSounds[i].setBuffer(shootBuffer);
     }
 
     // ============================================================
@@ -184,6 +185,7 @@ void AudioSystem::ensureSoundsInitialized() {
             buf[i] = static_cast<int16_t>(sample * 32000.f);
         }
         hitBuffer.loadFromSamples(buf.data(), buf.size(), 1, SAMPLE_RATE);
+        for (int i = 0; i < HIT_POOL; i++) hitSounds[i].setBuffer(hitBuffer);
     }
 
     // ============================================================
@@ -205,6 +207,7 @@ void AudioSystem::ensureSoundsInitialized() {
             s += sinf(2.f * 3.14159f * freqs[ni] * 2.f * lt) * 0.3f; // 2次谐波
             buf[i] = static_cast<int16_t>(s * env * 22000.f);
         }
+        pickupSound.setBuffer(pickupBuffer);
         pickupBuffer.loadFromSamples(buf.data(), buf.size(), 1, SAMPLE_RATE);
     }
 
@@ -223,6 +226,7 @@ void AudioSystem::ensureSoundsInitialized() {
             rumble += sinf(2.f * 3.14159f * 140.f * t) * 0.3f; // 2次谐波
             float noise = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * 0.1f; // 少量噪声
             buf[i] = static_cast<int16_t>((rumble + noise) * env * 26000.f);
+        playerHurtSound.setBuffer(playerHurtBuffer);
         }
         playerHurtBuffer.loadFromSamples(buf.data(), buf.size(), 1, SAMPLE_RATE);
     }
@@ -241,6 +245,7 @@ void AudioSystem::ensureSoundsInitialized() {
             float rumble = sinf(2.f * 3.14159f * 55.f * t) * 0.5f; // 55Hz（更低沉）
             rumble += sinf(2.f * 3.14159f * 110.f * t) * 0.35f; // 2次谐波
             rumble += sinf(2.f * 3.14159f * 220.f * t) * 0.15f; // 4次谐波（更丰富）
+        bossHurtSound.setBuffer(bossHurtBuffer);
             buf[i] = static_cast<int16_t>(rumble * env * 28000.f);
         }
         bossHurtBuffer.loadFromSamples(buf.data(), buf.size(), 1, SAMPLE_RATE);
@@ -261,6 +266,7 @@ void AudioSystem::ensureSoundsInitialized() {
             float noise = (static_cast<float>(rand()) / RAND_MAX - 0.5f); // 噪声
             float sweepFreq = 300.f + 1500.f * p; // 频率从300Hz滑到1800Hz
             float sweep = sinf(2.f * 3.14159f * sweepFreq * t); // 扫描正弦波
+        dashSound.setBuffer(dashBuffer);
             float s = (noise * 0.3f + sweep * 0.7f) * env; // 混合 + 包络
             buf[i] = static_cast<int16_t>(s * 20000.f);
         }
@@ -284,6 +290,7 @@ void AudioSystem::ensureSoundsInitialized() {
             chord += sinf(2.f * 3.14159f * freq * 1.5f * t) * 0.7f;
             chord += sinf(2.f * 3.14159f * freq * 2.f * t) * 0.4f;
             chord = tanhf(chord * 1.5f); // 双曲正切失真
+        overdriveSound.setBuffer(overdriveBuffer);
             // 添加谐波
             for (int h = 3; h <= 5; h++) chord += sinf(2.f * 3.14159f * freq * h * t) * (0.3f / h);
             buf[i] = static_cast<int16_t>(chord * env * 24000.f);
@@ -306,6 +313,7 @@ void AudioSystem::ensureSoundsInitialized() {
             float base = 900.f; // 基础频率
             float s = sinf(2.f * 3.14159f * base * t) * 0.5f;
             s += sinf(2.f * 3.14159f * base * 1.5f * t) * 0.3f; // 1.5倍
+        shieldSound.setBuffer(shieldBuffer);
             s += sinf(2.f * 3.14159f * base * 2.f * t) * 0.2f; // 2倍
             s += sinf(2.f * 3.14159f * base * 3.f * t) * 0.1f; // 3倍
             s *= 0.8f + 0.2f * sinf(2.f * 3.14159f * 8.f * t); // 8Hz颤动调制
@@ -343,6 +351,7 @@ void AudioSystem::ensureSoundsInitialized() {
             float shimmer = sinf(2.f * 3.14159f * 1047.f * lt) * 0.15f * attackEnv;
 
             // 第二个音符有上升音调扫描
+        victorySound.setBuffer(victoryBuffer);
             float sweep = (ni == 1) ? sinf(2.f * 3.14159f * (262.f + 200.f * noteP) * lt) * 0.4f : 0.f;
 
             float env = (1.f - noteP) * expf(-noteP * 1.2f);
@@ -374,6 +383,7 @@ void AudioSystem::ensureSoundsInitialized() {
 
             // 长的混响尾音
             float env = (1.f - noteP) * expf(-noteP * 0.8f) * expf(-lt * 2.f);
+        gameOverSound.setBuffer(gameOverBuffer);
 
             // 最后一个音符有额外低频轰鸣
             float boom = (ni == 3) ? sinf(2.f * 3.14159f * 30.f * lt) * expf(-lt * 8.f) * 0.6f : 0.f;
@@ -444,70 +454,64 @@ void AudioSystem::stopBackgroundMusic() {
 // ============================================================
 void AudioSystem::playShoot() {
     ensureSoundsInitialized();
-    sf::Sound sound(shootBuffer);
-    sound.setVolume(65.f);
-    sound.play();
+    shootSlot = (shootSlot + 1) % SHOOT_POOL;
+    shootSounds[shootSlot].setVolume(65.f);
+    shootSlot = (shootSlot + 1) % SHOOT_POOL;
+    shootSounds[shootSlot].play();
 }
 
 void AudioSystem::playHit() {
     ensureSoundsInitialized();
-    sf::Sound sound(hitBuffer);
-    sound.setVolume(100.f);
-    sound.play();
+    hitSlot = (hitSlot + 1) % HIT_POOL;
+    hitSounds[hitSlot].setVolume(100.f);
+    hitSlot = (hitSlot + 1) % HIT_POOL;
+    hitSounds[hitSlot].play();
 }
 
 void AudioSystem::playPickup() {
     ensureSoundsInitialized();
-    sf::Sound sound(pickupBuffer);
-    sound.setVolume(85.f);
-    sound.play();
+    pickupSound.setVolume(85.f);
+    pickupSound.play();
 }
 
 void AudioSystem::playPlayerHurt() {
     ensureSoundsInitialized();
-    sf::Sound sound(playerHurtBuffer);
-    sound.setVolume(85.f);
-    sound.play();
+    playerHurtSound.setVolume(85.f);
+    playerHurtSound.play();
 }
 
 void AudioSystem::playBossHurt() {
     ensureSoundsInitialized();
-    sf::Sound sound(bossHurtBuffer);
-    sound.setVolume(75.f);
-    sound.play();
+    bossHurtSound.setVolume(75.f);
+    bossHurtSound.play();
 }
 
 void AudioSystem::playDash() {
     ensureSoundsInitialized();
-    sf::Sound sound(dashBuffer);
-    sound.setVolume(75.f);
-    sound.play();
+    dashSound.setVolume(75.f);
+    dashSound.play();
 }
 
 void AudioSystem::playOverdrive() {
     ensureSoundsInitialized();
-    sf::Sound sound(overdriveBuffer);
-    sound.setVolume(85.f);
-    sound.play();
+    overdriveSound.setVolume(85.f);
+    overdriveSound.play();
 }
 
 void AudioSystem::playShield() {
     ensureSoundsInitialized();
-    sf::Sound sound(shieldBuffer);
-    sound.setVolume(75.f);
-    sound.play();
+    shieldSound.setVolume(75.f);
+    shieldSound.play();
 }
 
 void AudioSystem::playVictory() {
     ensureSoundsInitialized();
-    sf::Sound sound(victoryBuffer);
-    sound.setVolume(100.f);
-    sound.play();
+    victorySound.setVolume(100.f);
+    victorySound.play();
 }
 
 void AudioSystem::playGameOver() {
     ensureSoundsInitialized();
-    sf::Sound sound(gameOverBuffer);
-    sound.setVolume(100.f);
-    sound.play();
+    gameOverSound.setVolume(100.f);
+    gameOverSound.play();
 }

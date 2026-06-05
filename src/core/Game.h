@@ -3,10 +3,12 @@
 #include "GameStats.h"
 #include "entities/Player.h"
 #include "entities/Boss.h"
+#include "entities/BossManager.h"
 #include "entities/Item.h"
 #include "systems/BackgroundSystem.h"
 #include "systems/ParticleSystem.h"
 #include "systems/CameraShake.h"
+#include "systems/AudioSystem.h"
 #include "ui/HUD.h"
 #include "ui/Menu.h"
 
@@ -31,7 +33,9 @@ private:
     GameStats gameStats;
 
     Player player;
-    Boss boss;
+    BossManager bossManager;
+    AudioSystem audio;
+    Difficulty difficulty = Difficulty::Normal;
     std::vector<Item> items;
     float itemSpawnTimer;
     float bulletTimeTimer;
