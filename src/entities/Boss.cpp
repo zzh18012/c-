@@ -375,6 +375,12 @@ void Boss::spawnBullet(sf::Vector2f pos, sf::Vector2f dir, float speed, int dmg)
 void Boss::setBulletSpeedMultiplier(float mult) { bulletSpeedMultiplier = mult; }
 float Boss::getBulletSpeedMultiplier() const { return bulletSpeedMultiplier; }
 
+void Boss::setPosition(sf::Vector2f pos) { position = pos; }
+void Boss::setBossType(BossType type) { bossType = type; }
+void Boss::setEntranceAnimation(float progress) { entranceProgress = progress; }
+void Boss::setEntranceStartPos(sf::Vector2f pos) { entranceStartPos = pos; }
+void Boss::setEntranceTargetPos(sf::Vector2f pos) { entranceTargetPos = pos; }
+
 void Boss::clearAllBullets() {
     for (auto& bullet : bullets) {
         bullet.deactivate();

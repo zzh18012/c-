@@ -20,13 +20,20 @@ add_executable(NeonBulletArena
     src/core/Game.cpp
     src/entities/Player.cpp
     src/entities/Boss.cpp
+    src/entities/BossManager.cpp
     src/entities/PlayerBullet.cpp
+    src/entities/PlayerBulletCluster.cpp
+    src/entities/PlayerBulletHoming.cpp
+    src/entities/PlayerBulletOrbital.cpp
+    src/entities/PlayerBulletPiercing.cpp
+    src/entities/PlayerBulletSpread.cpp
     src/entities/BossBullet.cpp
     src/entities/Item.cpp
     src/systems/CollisionSystem.cpp
     src/systems/ParticleSystem.cpp
     src/systems/CameraShake.cpp
     src/systems/BackgroundSystem.cpp
+    src/systems/AudioSystem.cpp
     src/ui/HUD.cpp
     src/ui/Button.cpp
     src/ui/Menu.cpp
@@ -37,6 +44,7 @@ target_link_libraries(NeonBulletArena PRIVATE
     sfml-graphics
     sfml-window
     sfml-system
+    sfml-audio
     sfml-main
 )
 
@@ -50,6 +58,9 @@ add_custom_command(TARGET NeonBulletArena POST_BUILD
         "$<TARGET_FILE_DIR:NeonBulletArena>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:sfml-system>"
+        "$<TARGET_FILE_DIR:NeonBulletArena>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:sfml-audio>"
         "$<TARGET_FILE_DIR:NeonBulletArena>"
 )
 

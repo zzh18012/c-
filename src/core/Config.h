@@ -124,3 +124,79 @@ constexpr float BG_DOT_MIN_RADIUS = 2.5f;
 constexpr float BG_DOT_MAX_RADIUS = 5.f;
 constexpr float BG_DOT_DRIFT_SPEED = 25.f;
 constexpr float BG_DOT_PULSE_SPEED = 1.5f;
+
+// ============================================================
+// Difficulty & Boss Manager
+// ============================================================
+enum class Difficulty {
+    Normal,   // 1 Boss
+    Hard,     // 2 Bosses
+    Lunatic   // 3 Bosses (second wave at 50% HP)
+};
+constexpr int MAX_BOSS_COUNT = 3;
+constexpr int HARD_BOSS_COUNT = 2;
+constexpr int LUNATIC_BOSS_COUNT = 3;
+constexpr float BOSS_SPAWN_HP_THRESHOLD = 0.5f;
+constexpr float BOSS_SPAWN_MIN_X = 200.f;
+constexpr float BOSS_SPAWN_MAX_X = WINDOW_WIDTH - 200.f;
+constexpr float BOSS_SPAWN_MIN_Y = 100.f;
+constexpr float BOSS_SPAWN_MAX_Y = 250.f;
+
+// Player special bullet types - speed & damage
+constexpr float PLAYER_CLUSTER_SPEED = 400.f;
+constexpr float PLAYER_SPREAD_ANGLE = 30.f;
+constexpr float PLAYER_PIERCING_SPEED = 1200.f;
+constexpr int PLAYER_PIERCING_DAMAGE = 15;
+constexpr float PLAYER_ORBITAL_SPEED = 180.f;
+constexpr float PLAYER_ORBITAL_RADIUS = 60.f;
+constexpr int ORBITAL_BULLET_DAMAGE = 15;
+constexpr int PLAYER_HOMING_DAMAGE = 18;
+constexpr float HOMING_TURN_RATE = 0.03f;
+
+// Cooldowns
+constexpr float PLAYER_SPREAD_COOLDOWN = 0.3f;
+constexpr float PLAYER_PIERCING_COOLDOWN = 0.5f;
+constexpr float PLAYER_ORBITAL_COOLDOWN = 0.1f;
+constexpr float PLAYER_CLUSTER_COOLDOWN = 0.4f;
+constexpr float PLAYER_HOMING_COOLDOWN = 0.6f;
+constexpr int PLAYER_SPREAD_COUNT = 5;
+constexpr float PLAYER_CLUSTER_BURST_COUNT = 8;
+
+// Boss attack extra speeds
+constexpr float SNAKE_SPEED = 200.f;
+constexpr float HOMING_ORB_INTERVAL = 0.8f;
+constexpr float HOMING_ORB_DURATION = 4.0f;
+constexpr float HOMING_ORB_SPEED = 120.f;
+constexpr float BLADE_RING_SPEED = 250.f;
+constexpr float SCREEN_WIPE_SPEED = 400.f;
+constexpr float PREDICTIVE_SHOT_SPEED = 600.f;
+
+// Combo & weapon effects
+constexpr int COMBO_THRESHOLD = 3;
+constexpr float COMBO_DAMAGE_MULT = 1.5f;
+constexpr float COMBO_TIMEOUT = 2.f;
+constexpr float SPREAD_BOUNCE_DAMAGE_MULT = 0.7f;
+constexpr float PIERCE_CHAIN_DAMAGE_RATIO = 0.5f;
+constexpr float PIERCE_CHAIN_RADIUS = 80.f;
+constexpr int ORBITAL_MAX_DAMAGE = 60;
+constexpr int CLUSTER_SPLIT_COUNT = 2;
+constexpr float CLUSTER_SPLIT_DAMAGE_RATIO = 0.3f;
+
+// Homing slow
+constexpr float HOMING_SLOW_STACK = 0.1f;
+constexpr float HOMING_SLOW_DURATION = 2.f;
+constexpr int HOMING_SLOW_MAX_STACKS = 3;
+
+// Minion & phase transition
+constexpr int MINION_DAMAGE = 20;
+constexpr float PHASE_TRANSITION_DURATION = 2.0f;
+constexpr int MAX_MINIONS = 5;
+constexpr float PHASE_SHIFT_DURATION = 1.0f;
+constexpr float PHASE_SHIFT_TRIGGER_CHANCE = 0.35f;
+constexpr float NOVA_FORM_DURATION = 0.5f;
+constexpr int NOVA_FORM_DAMAGE = 100;
+constexpr float NOVA_FORM_RADIUS = 500.f;
+constexpr float SPEED_COIL_DURATION = 8.0f;
+constexpr float SPEED_COIL_MULT = 1.5f;
+constexpr float ATTACK_MODULE_DURATION = 10.0f;
+constexpr float ATTACK_MODULE_MULT = 1.3f;

@@ -5,6 +5,12 @@
 #include "core/GameStats.h"
 #include "BossBullet.h"
 
+enum class BossType {
+    Inferno,   // 烈焰恶魔
+    Void,      // 虚空幽灵
+    Thunder    // 雷霆泰坦
+};
+
 class Boss {
 public:
     Boss();
@@ -12,11 +18,17 @@ public:
     void render(sf::RenderWindow& window) const;
 
     sf::Vector2f getPosition() const;
+    void setPosition(sf::Vector2f pos);
     float getRadius() const;
     int getHP() const;
     int getMaxHP() const;
     int getPhase() const;
     bool isDead() const;
+
+    void setBossType(BossType type);
+    void setEntranceAnimation(float progress);
+    void setEntranceStartPos(sf::Vector2f pos);
+    void setEntranceTargetPos(sf::Vector2f pos);
     std::string getCurrentAttackName() const;
     BossAttackType getCurrentAttackType() const;
     void takeDamage(int damage);
@@ -50,6 +62,10 @@ private:
     int maxHP;
     int phase;
     float bulletSpeedMultiplier = 1.f;
+    BossType bossType = BossType::Inferno;
+    float entranceProgress = 0.f;
+    sf::Vector2f entranceStartPos;
+    sf::Vector2f entranceTargetPos;
 
     // Attack state
     BossAttackType currentAttack;
